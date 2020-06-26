@@ -1,0 +1,24 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=D7:32:E6:CB:F9:D3:BC:43:06:CE:CD:7A:01:FF:7E:E6:C3:4D:10:26%3Bcom.pchauvet.heardreality
+
+    You can also add your credentials to an existing key, using these values:
+
+    Package name:
+    com.pchauvet.heardreality
+
+    SHA-1 certificate fingerprint:
+    D7:32:E6:CB:F9:D3:BC:43:06:CE:CD:7A:01:FF:7E:E6:C3:4D:10:26
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyDeBtULU5zg0b8_-onF_uyK9FZA8eHhA_c</string>
+</resources>

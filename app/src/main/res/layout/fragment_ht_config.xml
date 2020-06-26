@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/ht_config_close"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_gravity="end"
+        android:tint="@color/red"
+        app:srcCompat="@drawable/ic_action_notify_cancel" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/alert_dialog_padding_bottom"
+        android:paddingEnd="@dimen/alert_dialog_padding_right"
+        android:paddingStart="@dimen/alert_dialog_padding_left">
+
+        <TextView
+            android:id="@+id/ht_config_title"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_marginBottom="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/ht_config_title" />
+
+        <LinearLayout
+            android:id="@+id/ht_config_namebar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/ht_config_connection" />
+
+            <EditText
+                android:id="@+id/ht_config_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:inputType="text"
+                android:paddingEnd="0dp"
+                android:paddingStart="4dp"
+                android:singleLine="true"
+                android:textColor="@color/black"
+                android:textColorLink="@color/colorAccent"/>
+
+            <ImageButton
+                android:id="@+id/ht_config_edit_name"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:srcCompat="@android:drawable/ic_menu_edit" />
+
+            <ImageButton
+                android:id="@+id/ht_config_confirm_name"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:tint="@color/black"
+                android:visibility="gone"
+                app:srcCompat="?android:attr/textCheckMarkInverse" />
+
+            <ImageButton
+                android:id="@+id/ht_config_cancel_name"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:tint="#9E9E9E"
+                android:visibility="gone"
+                app:srcCompat="@android:drawable/ic_delete" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/ht_config_looking" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/ht_orientation_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:padding="5dp"
+                tools:srcCompat="@drawable/orientation_static"/>
+
+            <ImageView
+                android:id="@+id/ht_elevation_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:padding="5dp"
+                tools:srcCompat="@drawable/elevation_static"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:text="@string/ht_config_orientation" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:text="@string/ht_config_elevation" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/ht_config_calibrate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
+            android:layout_margin="20dp"
+            android:text="@string/ht_config_calibrate"
+            android:backgroundTint="@color/lightGrey"/>
+
+        <Button
+            android:id="@+id/ht_config_disconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:text="@string/ht_config_disconnect"
+            android:backgroundTint="@color/lightGrey"/>
+
+    </LinearLayout>
+</LinearLayout>
+

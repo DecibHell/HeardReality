@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "764137836939",
+    "firebase_url": "https://endless-comfort-279415.firebaseio.com",
+    "project_id": "endless-comfort-279415",
+    "storage_bucket": "endless-comfort-279415.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764137836939:android:15268023532b87b778df8e",
+        "android_client_info": {
+          "package_name": "com.pchauvet.heardreality"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "764137836939-2bnogndl5m3h0q5bh7u330m7daj4ncid.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeBtULU5zg0b8_-onF_uyK9FZA8eHhA_c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "764137836939-2bnogndl5m3h0q5bh7u330m7daj4ncid.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
