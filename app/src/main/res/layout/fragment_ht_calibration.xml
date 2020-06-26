@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/ht_calibration_close"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_gravity="end"
+        android:tint="@color/red"
+        app:srcCompat="@drawable/ic_action_notify_cancel" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/alert_dialog_padding_bottom"
+        android:paddingEnd="@dimen/alert_dialog_padding_right"
+        android:paddingStart="@dimen/alert_dialog_padding_left">
+
+        <TextView
+            android:id="@+id/ht_calibration_title"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_marginBottom="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/ht_calibration_title" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/ht_calibration_instructions" />
+
+
+        <ImageView
+            android:id="@+id/ht_calibration_compass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="50dp"
+            tools:srcCompat="@drawable/compass" />
+
+        <Button
+            android:id="@+id/ht_calibration_validate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
+            android:text="@string/ht_config_calibrate"
+            android:backgroundTint="@color/lightGrey"/>
+
+    </LinearLayout>
+</LinearLayout>
+
