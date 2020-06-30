@@ -6,9 +6,11 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,6 +23,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,11 +42,13 @@ import com.pchauvet.heardreality.dialogs.PermissionRationaleDialogFragment;
 import com.pchauvet.heardreality.dialogs.WaitingScreen;
 import com.pchauvet.heardreality.objects.HeardProject;
 
+import androidx.appcompat.view.menu.ListMenuPresenter;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import static com.pchauvet.heardreality.Utils.REQUEST_ACCESS_FINE_LOCATION;
+import static com.pchauvet.heardreality.Utils.getProjectStartingPoint;
 
 public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
         FirestoreManager.DBChangeListener{
@@ -78,6 +83,8 @@ public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
 
     private ProjectElementAdapter projectsAdapter;
 
+    private final int DEFAULT_ZOOM = 15;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Create a location provider
@@ -96,12 +103,7 @@ public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
         }
 
         mCenterUserButton = view.findViewById(R.id.wmf_center_user);
-        mCenterUserButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(mUserLatLng));
-            }
-        });
+        mCenterUserButton.setOnClickListener(v -> mMap.animateCamera(CameraUpdateFactory.newLatLng(mUserLatLng)));
 
         mZoomSlider = view.findViewById(R.id.wmf_zoom);
         mZoomSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -121,49 +123,28 @@ public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
         mListLayout = view.findViewById(R.id.wmf_list);
 
         mListTabs = view.findViewById(R.id.wmf_list_tabs);
-        mListTabs.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId){
-                    case R.id.wmf_list_downloaded :
-                        mListFilters[1] = "DOWNLOADED";
-//                        final WaitingScreen mWaitingScreen = new WaitingScreen();
-//                        mWaitingScreen.show(getParentFragmentManager(), null);
-//
-//                        StorageManager.downloadProject(projectID, new Thread(){
-//                            @Override
-//                            public void run(){
-//                                mWaitingScreen.dismiss();
-                                // Update DB to add +1 to the downloads!
-//                            }
-//                        },new Thread(){
-//                            @Override
-//                            public void run(){
-//                                mWaitingScreen.dismiss();
-//                            }
-//                        });
-                        break;
-                    case R.id.wmf_list_my_projects :
-                        mListFilters[1] = "MYPROJECTS";
-                        break;
-                    default :
-                        mListFilters[1] = "ALL";
-                }
-                projectsAdapter.getFilter().filter(formatFilter());
+        mListTabs.setOnCheckedChangeListener((group, checkedId) -> {
+            switch (checkedId){
+                case R.id.wmf_list_downloaded :
+                    mListFilters[1] = "DOWNLOADED";
+                    break;
+                case R.id.wmf_list_my_projects :
+                    mListFilters[1] = "MYPROJECTS";
+                    break;
+                default :
+                    mListFilters[1] = "ALL";
             }
+            projectsAdapter.getFilter().filter(formatFilter());
         });
 
         mProjectsToggle = view.findViewById(R.id.wmf_projects_toggle);
-        mProjectsToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mListLayout.getVisibility() == View.GONE){
-                    mListLayout.setVisibility(View.VISIBLE);
-                    mProjectsToggle.setBackgroundColor(getResources().getColor(R.color.colorAccent2, null));
-                }else{
-                    mListLayout.setVisibility(View.GONE);
-                    mProjectsToggle.setBackgroundColor(getResources().getColor(R.color.colorAccent, null));
-                }
+        mProjectsToggle.setOnClickListener(v -> {
+            if(mListLayout.getVisibility() == View.GONE){
+                mListLayout.setVisibility(View.VISIBLE);
+                mProjectsToggle.setBackgroundColor(getResources().getColor(R.color.colorAccent2, null));
+            }else{
+                mListLayout.setVisibility(View.GONE);
+                mProjectsToggle.setBackgroundColor(getResources().getColor(R.color.colorAccent, null));
             }
         });
 
@@ -172,40 +153,43 @@ public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
         mProjectsNameSearch = view.findViewById(R.id.wmf_projects_name_search);
         mProjectsNameCancel = view.findViewById(R.id.wmf_projects_name_cancel);
 
-        mProjectsNameSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String nameFilter = mProjectsNameText.getText().toString();
-                if(!nameFilter.isEmpty()){
-                    mProjectsNameText.setEnabled(false);
-                    mProjectsNameSearch.setVisibility(View.GONE);
-                    mProjectsNameCancel.setVisibility(View.VISIBLE);
-                    mProjectsToggle.setBackgroundColor(getResources().getColor(R.color.colorAccent2, null));
+        mProjectsNameSearch.setOnClickListener(v -> {
+            String nameFilter = mProjectsNameText.getText().toString();
+            if(!nameFilter.isEmpty()){
+                mProjectsNameText.setEnabled(false);
+                mProjectsNameSearch.setVisibility(View.GONE);
+                mProjectsNameCancel.setVisibility(View.VISIBLE);
+                mProjectsToggle.setBackgroundColor(getResources().getColor(R.color.colorAccent2, null));
 
-                    mListLayout.setVisibility(View.VISIBLE);
+                mListLayout.setVisibility(View.VISIBLE);
 
-                    mListFilters[0] = mProjectsNameText.getText().toString();
-                    projectsAdapter.getFilter().filter(formatFilter());
-                }
-            }
-        });
-
-        mProjectsNameCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mProjectsNameText.setEnabled(true);
-                mProjectsNameText.setText(null);
-                mProjectsNameSearch.setVisibility(View.VISIBLE);
-                mProjectsNameCancel.setVisibility(View.GONE);
-
-                mListFilters[0] = "";
+                mListFilters[0] = mProjectsNameText.getText().toString();
                 projectsAdapter.getFilter().filter(formatFilter());
             }
         });
 
+        mProjectsNameCancel.setOnClickListener(v -> {
+            mProjectsNameText.setEnabled(true);
+            mProjectsNameText.setText(null);
+            mProjectsNameSearch.setVisibility(View.VISIBLE);
+            mProjectsNameCancel.setVisibility(View.GONE);
+
+            mListFilters[0] = "";
+            projectsAdapter.getFilter().filter(formatFilter());
+        });
+
         mListView = view.findViewById(R.id.wmf_list_view);
-        projectsAdapter = new ProjectElementAdapter(requireContext());
+        projectsAdapter = new ProjectElementAdapter(requireContext(), view);
         mListView.setAdapter(projectsAdapter);
+
+        // When clicking on a project in the list, move the camera on its starting point
+        mListView.setOnItemClickListener((adapterView, view1, position, id) -> {
+            HeardProject project = (HeardProject)adapterView.getItemAtPosition(position);
+            LatLng startingPoint = getProjectStartingPoint(project);
+            if (startingPoint != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startingPoint, DEFAULT_ZOOM));
+            }
+        });
 
         FirestoreManager.dbChangeListeners.add(this);
     }
@@ -218,36 +202,27 @@ public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
 
-       mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
-           @Override
-           public void onCameraMoveStarted(int reason) {
-               mLastMovementReason = reason;
-           }
-       });
+        mMap.getUiSettings().setMapToolbarEnabled(false);
 
-        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-            @Override
-            public void onCameraMove() {
-                // Update the zoom slider if the movement was made by a user gesture
-                if(mLastMovementReason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE){
-                    CameraPosition cameraPosition = mMap.getCameraPosition();
-                    float zoom = cameraPosition.zoom;
-                    mZoomSlider.setProgress((int)(zoom/5));
-                }
+       mMap.setOnCameraMoveStartedListener(reason -> mLastMovementReason = reason);
+
+        mMap.setOnCameraMoveListener(() -> {
+            // Update the zoom slider if the movement was made by a user gesture
+            if(mLastMovementReason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE){
+                CameraPosition cameraPosition = mMap.getCameraPosition();
+                float zoom = cameraPosition.zoom;
+                mZoomSlider.setProgress((int)(zoom/5));
             }
         });
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationClient.getLastLocation()
-                    .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                mUserLatLng = new LatLng(location.getLatitude(),location.getLongitude());
-                                mark = mMap.addMarker(new MarkerOptions().position(mUserLatLng).title("Oh hi Mark"));
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mUserLatLng, 15));
-                            }
+                    .addOnSuccessListener(requireActivity(), location -> {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            mUserLatLng = new LatLng(location.getLatitude(),location.getLongitude());
+                            mark = mMap.addMarker(new MarkerOptions().position(mUserLatLng).title("Oh hi Mark"));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mUserLatLng, DEFAULT_ZOOM));
                         }
                     });
             // We create location requests to update the user's position
@@ -281,14 +256,15 @@ public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
         return mListFilters[0]+"\\/"+mListFilters[1];
     }
 
-    @Override
-    public void onProjectsChanged() {
-        requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+    public void updateProjectList(){
+        requireActivity().runOnUiThread(() -> {
             projectsAdapter.updateItems();
             projectsAdapter.getFilter().filter(formatFilter());
-            }
         });
+    }
+
+    @Override
+    public void onProjectsChanged() {
+        updateProjectList();
     }
 }

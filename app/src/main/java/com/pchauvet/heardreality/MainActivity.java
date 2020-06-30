@@ -68,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
 
     private FragmentManager mFragmentManager;
 
+    private FragmentTransaction fragmentTransaction;
+
     private ArrayList<BluetoothDevice> mConnectedBleDeviceList;
 
     private BluetoothDevice mDevice;
@@ -263,8 +265,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
     };
 
-    private FragmentTransaction fragmentTransaction;
-
     private void updateBatteryLevelVisibility(final int visibility) {
         mBatteryLevel.setVisibility(visibility);
         mBatteryLevelImg.setVisibility(visibility);
@@ -292,12 +292,7 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
 
         mHTButton = findViewById(R.id.ht_config_button);
 
-        mHTButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickConnect();
-            }
-        });
+        mHTButton.setOnClickListener(v -> onClickConnect());
 
         // Make sure that the window pans to adjust to screen changes (like opening the keyboard)
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
@@ -333,9 +328,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
 
         mUserProfileFragment = new UserProfileFragment();
-
-        // Init the storage manager
-        StorageManager.init(this);
     }
 
     @Override
@@ -375,6 +367,12 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e("",getSupportFragmentManager().getFragments().toString());
     }
 
     @Override
@@ -488,23 +486,13 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
     private void updateUiOnDeviceConnected() {
         updateHTStatus();
         mHTButton.setText(R.string.ht_config);
-        mHTButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                onClickConfig();
-            }
-        });
+        mHTButton.setOnClickListener(v -> onClickConfig());
     }
 
     private void updateUiOnDeviceDisconnected() {
         updateHTStatus();
         mHTButton.setText(R.string.ht_connect);
-        mHTButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                onClickConnect();
-            }
-        });
+        mHTButton.setOnClickListener(v -> onClickConnect());
     }
 
     /**
@@ -538,12 +526,9 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
             }
 
             if (device.equals(mDevice)) {
-                new Handler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        stopScan();
-                        connect();
-                    }
+                new Handler().post(() -> {
+                    stopScan();
+                    connect();
                 });
             }
         }
@@ -573,12 +558,7 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
     };
 
-    final Runnable mBleScannerTimeoutRunnable = new Runnable() {
-        @Override
-        public void run() {
-            stopScan();
-        }
-    };
+    final Runnable mBleScannerTimeoutRunnable = this::stopScan;
 
     private void updateBatteryLevel(final int batteryLevel) {
         if (batteryLevel > -1) {

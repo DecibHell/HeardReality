@@ -138,16 +138,13 @@ public class ScannerFragment extends DialogFragment {
 
         listview.setEmptyView(dialogView.findViewById(android.R.id.empty));
         listview.setAdapter(mAdapter = new DeviceListAdapter());
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-                stopScan();
-                dismiss();
+        listview.setOnItemClickListener((parent, view, position, id) -> {
+            stopScan();
+            dismiss();
 
-                final ScannerFragmentListener listener = (ScannerFragmentListener) requireActivity();
-                final ExtendedBluetoothDevice device = (ExtendedBluetoothDevice) mAdapter.getItem(position);
-                listener.onDeviceSelected(device.device, device.name != null ? device.name : getString(R.string.not_available));
-            }
+            final ScannerFragmentListener listener = (ScannerFragmentListener) requireActivity();
+            final ExtendedBluetoothDevice device = (ExtendedBluetoothDevice) mAdapter.getItem(position);
+            listener.onDeviceSelected(device.device, device.name != null ? device.name : getString(R.string.not_available));
         });
 
         final AlertDialog dialog = builder
@@ -158,16 +155,13 @@ public class ScannerFragment extends DialogFragment {
 
         // Button listener needs to be set like this, otherwise it would always dismiss the dialog.
         mScanButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        mScanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                if (mIsScanning) {
-                    final ScannerFragmentListener listener = (ScannerFragmentListener) requireActivity();
-                    listener.onNothingSelected();
-                    dialog.cancel();
-                } else {
-                    startScan();
-                }
+        mScanButton.setOnClickListener(v -> {
+            if (mIsScanning) {
+                final ScannerFragmentListener listener = (ScannerFragmentListener) requireActivity();
+                listener.onNothingSelected();
+                dialog.cancel();
+            } else {
+                startScan();
             }
         });
 
@@ -218,12 +212,9 @@ public class ScannerFragment extends DialogFragment {
         scanner.startScan(filters, settings, scanCallback);
 
         mIsScanning = true;
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mIsScanning) {
-                    stopScan();
-                }
+        mHandler.postDelayed(() -> {
+            if (mIsScanning) {
+                stopScan();
             }
         }, SCAN_DURATION);
     }

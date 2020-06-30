@@ -11,13 +11,13 @@ public class Range {
     private String id;
 
     private String name;
-    private String type;
+    private String type; // "POLYGONAL" or "CIRCULAR"
 
     // CIRCULAR RANGE
     private GeoPoint center;
     private Double radius;
 
-    // POLYGONIAL RANGE
+    // POLYGONAL RANGE
     private List<GeoPoint> points;
 
     public String getId() {

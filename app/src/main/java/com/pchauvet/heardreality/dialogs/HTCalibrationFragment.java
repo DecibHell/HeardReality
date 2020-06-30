@@ -44,25 +44,18 @@ public class HTCalibrationFragment extends DialogFragment implements SensorEvent
         mSensorManager = (SensorManager) requireContext().getSystemService(SENSOR_SERVICE);
 
         mExitButton = dialogView.findViewById(R.id.ht_calibration_close);
-        mExitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        mExitButton.setOnClickListener(v -> dismiss());
 
         mCompassImage = dialogView.findViewById(R.id.ht_calibration_compass);
         mCompassImage.setImageResource(R.drawable.compass);
 
         mValidateButton = dialogView.findViewById(R.id.ht_calibration_validate);
-        mValidateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final HTCalibrationFragment.HTCalibrationFragmentListener listener = (HTCalibrationFragment.HTCalibrationFragmentListener) requireActivity();
-                listener.onCalibration();
+        mValidateButton.setOnClickListener(v -> {
+            final HTCalibrationFragmentListener listener = (HTCalibrationFragmentListener) requireActivity();
+            listener.onCalibration();
 
-                dismiss();
-            }});
+            dismiss();
+        });
 
         dialog.setCanceledOnTouchOutside(true);
         dialog.setContentView(dialogView);

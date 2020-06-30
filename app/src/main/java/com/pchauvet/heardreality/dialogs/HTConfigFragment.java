@@ -51,12 +51,7 @@ public class HTConfigFragment extends DialogFragment{
         @SuppressLint("InflateParams") final View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_ht_config, null);
 
         mExitButton = dialogView.findViewById(R.id.ht_config_close);
-        mExitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        mExitButton.setOnClickListener(v -> dismiss());
 
         mRenameButton = dialogView.findViewById(R.id.ht_config_edit_name);
         mConfirmName = dialogView.findViewById(R.id.ht_config_confirm_name);
@@ -64,61 +59,46 @@ public class HTConfigFragment extends DialogFragment{
         mNameTextview = dialogView.findViewById(R.id.ht_config_name);
         mNameTextview.setText(deviceName);
 
-        mRenameButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNameTextview.setEnabled(true);
-                mRenameButton.setVisibility(View.GONE);
-                mConfirmName.setVisibility(View.VISIBLE);
-                mCancelName.setVisibility(View.VISIBLE);
+        mRenameButton.setOnClickListener(v -> {
+            mNameTextview.setEnabled(true);
+            mRenameButton.setVisibility(View.GONE);
+            mConfirmName.setVisibility(View.VISIBLE);
+            mCancelName.setVisibility(View.VISIBLE);
 
-                mNameTextview.setText(null);
-            }
+            mNameTextview.setText(null);
         });
 
-        mConfirmName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNameTextview.setEnabled(false);
-                mRenameButton.setVisibility(View.VISIBLE);
-                mConfirmName.setVisibility(View.GONE);
-                mCancelName.setVisibility(View.GONE);
+        mConfirmName.setOnClickListener(v -> {
+            mNameTextview.setEnabled(false);
+            mRenameButton.setVisibility(View.VISIBLE);
+            mConfirmName.setVisibility(View.GONE);
+            mCancelName.setVisibility(View.GONE);
 
-                deviceName = mNameTextview.getText().toString();
+            deviceName = mNameTextview.getText().toString();
 
-                final HTConfigFragmentListener listener = (HTConfigFragmentListener) requireActivity();
-                listener.onNameChanged(deviceName);
-            }
+            final HTConfigFragmentListener listener = (HTConfigFragmentListener) requireActivity();
+            listener.onNameChanged(deviceName);
         });
 
-        mCancelName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNameTextview.setEnabled(false);
-                mRenameButton.setVisibility(View.VISIBLE);
-                mConfirmName.setVisibility(View.GONE);
-                mCancelName.setVisibility(View.GONE);
+        mCancelName.setOnClickListener(v -> {
+            mNameTextview.setEnabled(false);
+            mRenameButton.setVisibility(View.VISIBLE);
+            mConfirmName.setVisibility(View.GONE);
+            mCancelName.setVisibility(View.GONE);
 
-                mNameTextview.setText(deviceName);
-            }
+            mNameTextview.setText(deviceName);
         });
 
         mCalibrateButton = dialogView.findViewById(R.id.ht_config_calibrate);
-        mCalibrateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCalibrationFragment.show(requireActivity().getSupportFragmentManager(),null);
-            }});
+        mCalibrateButton.setOnClickListener(v -> mCalibrationFragment.show(requireActivity().getSupportFragmentManager(),null));
 
         mDisconnectButton = dialogView.findViewById(R.id.ht_config_disconnect);
-        mDisconnectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final HTConfigFragmentListener listener = (HTConfigFragmentListener) requireActivity();
-                listener.onDisconnectOrder();
+        mDisconnectButton.setOnClickListener(v -> {
+            final HTConfigFragmentListener listener = (HTConfigFragmentListener) requireActivity();
+            listener.onDisconnectOrder();
 
-                dismiss();
-            }});
+            dismiss();
+        });
 
         mOrientationImage = dialogView.findViewById(R.id.ht_orientation_image);
         mOrientationImage.setImageResource(R.drawable.orientation_static);

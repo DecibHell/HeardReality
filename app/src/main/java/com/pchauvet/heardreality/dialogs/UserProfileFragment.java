@@ -57,12 +57,7 @@ public class UserProfileFragment extends DialogFragment {
         final User user = FirestoreManager.getUser(userId);
 
         mExitButton = dialogView.findViewById(R.id.upf_close);
-        mExitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        mExitButton.setOnClickListener(v -> dismiss());
 
         mUsername = dialogView.findViewById(R.id.upf_username);
         mUsernameEdit = dialogView.findViewById(R.id.upf_username_edit);
@@ -71,40 +66,31 @@ public class UserProfileFragment extends DialogFragment {
 
         mUsername.setText(user.getName());
 
-        mUsernameEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mUsername.setEnabled(true);
-                mUsernameEdit.setVisibility(View.GONE);
-                mUsernameConfirm.setVisibility(View.VISIBLE);
-                mUsernameCancel.setVisibility(View.VISIBLE);
-            }
+        mUsernameEdit.setOnClickListener(v -> {
+            mUsername.setEnabled(true);
+            mUsernameEdit.setVisibility(View.GONE);
+            mUsernameConfirm.setVisibility(View.VISIBLE);
+            mUsernameCancel.setVisibility(View.VISIBLE);
         });
 
-        mUsernameConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mUsername.setEnabled(false);
-                mUsernameEdit.setVisibility(View.VISIBLE);
-                mUsernameConfirm.setVisibility(View.GONE);
-                mUsernameCancel.setVisibility(View.GONE);
+        mUsernameConfirm.setOnClickListener(v -> {
+            mUsername.setEnabled(false);
+            mUsernameEdit.setVisibility(View.VISIBLE);
+            mUsernameConfirm.setVisibility(View.GONE);
+            mUsernameCancel.setVisibility(View.GONE);
 
-                String username = mUsername.getText().toString();
-                FirestoreManager.updateUser(userId, "name", username);
-                user.setName(username);
-            }
+            String username = mUsername.getText().toString();
+            FirestoreManager.updateUser(userId, "name", username);
+            user.setName(username);
         });
 
-        mUsernameCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mUsername.setEnabled(false);
-                mUsernameEdit.setVisibility(View.VISIBLE);
-                mUsernameConfirm.setVisibility(View.GONE);
-                mUsernameCancel.setVisibility(View.GONE);
+        mUsernameCancel.setOnClickListener(v -> {
+            mUsername.setEnabled(false);
+            mUsernameEdit.setVisibility(View.VISIBLE);
+            mUsernameConfirm.setVisibility(View.GONE);
+            mUsernameCancel.setVisibility(View.GONE);
 
-                mUsername.setText(user.getName());
-            }
+            mUsername.setText(user.getName());
         });
 
         mDescription = dialogView.findViewById(R.id.upf_description);
@@ -114,67 +100,53 @@ public class UserProfileFragment extends DialogFragment {
 
         mDescription.setText(user.getDescription());
 
-        mDescriptionEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDescription.setEnabled(true);
-                mDescriptionEdit.setVisibility(View.GONE);
-                mDescriptionConfirm.setVisibility(View.VISIBLE);
-                mDescriptionCancel.setVisibility(View.VISIBLE);
-            }
+        mDescriptionEdit.setOnClickListener(v -> {
+            mDescription.setEnabled(true);
+            mDescriptionEdit.setVisibility(View.GONE);
+            mDescriptionConfirm.setVisibility(View.VISIBLE);
+            mDescriptionCancel.setVisibility(View.VISIBLE);
         });
 
-        mDescriptionConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDescription.setEnabled(false);
-                mDescriptionEdit.setVisibility(View.VISIBLE);
-                mDescriptionConfirm.setVisibility(View.GONE);
-                mDescriptionCancel.setVisibility(View.GONE);
+        mDescriptionConfirm.setOnClickListener(v -> {
+            mDescription.setEnabled(false);
+            mDescriptionEdit.setVisibility(View.VISIBLE);
+            mDescriptionConfirm.setVisibility(View.GONE);
+            mDescriptionCancel.setVisibility(View.GONE);
 
-                String description = mDescription.getText().toString();
-                FirestoreManager.updateUser(userId, "description", description);
-                user.setDescription(description);
-            }
+            String description = mDescription.getText().toString();
+            FirestoreManager.updateUser(userId, "description", description);
+            user.setDescription(description);
         });
 
-        mDescriptionCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDescription.setEnabled(false);
-                mDescriptionEdit.setVisibility(View.VISIBLE);
-                mDescriptionConfirm.setVisibility(View.GONE);
-                mDescriptionCancel.setVisibility(View.GONE);
+        mDescriptionCancel.setOnClickListener(v -> {
+            mDescription.setEnabled(false);
+            mDescriptionEdit.setVisibility(View.VISIBLE);
+            mDescriptionConfirm.setVisibility(View.GONE);
+            mDescriptionCancel.setVisibility(View.GONE);
 
-                mDescription.setText(user.getDescription());
-            }
+            mDescription.setText(user.getDescription());
         });
 
         mPassword = dialogView.findViewById(R.id.upf_confirm);
         mConfirm = dialogView.findViewById(R.id.upf_password);
         mPasswordValidate = dialogView.findViewById(R.id.upf_password_validate);
 
-        mPasswordValidate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String password = mPassword.getText().toString();
-                String confirm = mConfirm.getText().toString();
-                if(!password.isEmpty() && password.equals(confirm)){
-                    AuthManager.currentUser.updatePassword(password);
-                    mPassword.setText(null);
-                    mConfirm.setText(null);
-                }
+        mPasswordValidate.setOnClickListener(v -> {
+            String password = mPassword.getText().toString();
+            String confirm = mConfirm.getText().toString();
+            if(!password.isEmpty() && password.equals(confirm)){
+                AuthManager.currentUser.updatePassword(password);
+                mPassword.setText(null);
+                mConfirm.setText(null);
             }
         });
 
         mDisconnectButton = dialogView.findViewById(R.id.upf_disconnect);
-        mDisconnectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AuthManager.disconnect();
-                dismiss();
-                new LoginFragment().show(requireActivity().getSupportFragmentManager(), null);
-            }});
+        mDisconnectButton.setOnClickListener(v -> {
+            AuthManager.disconnect();
+            dismiss();
+            new LoginFragment().show(requireActivity().getSupportFragmentManager(), null);
+        });
 
         dialog.setCanceledOnTouchOutside(true);
         dialog.setContentView(dialogView);

@@ -2,11 +2,7 @@ package com.pchauvet.heardreality.dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.RotateDrawable;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,19 +10,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pchauvet.heardreality.AuthManager;
 import com.pchauvet.heardreality.FirestoreManager;
-import com.pchauvet.heardreality.MathUtils.EulerAngles;
 import com.pchauvet.heardreality.R;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 public class LoginFragment  extends DialogFragment {
 
@@ -57,59 +48,40 @@ public class LoginFragment  extends DialogFragment {
         mPasswordEdit = dialogView.findViewById(R.id.login_password);
 
         mValidateButton = dialogView.findViewById(R.id.login_validate_button);
-        mValidateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = mEmailEdit.getText().toString();
-                String password = mPasswordEdit.getText().toString();
-                if(email.isEmpty()){
-                    // MISSING EMAIL
-                    mErrorText.setText(R.string.missing_email);
-                    mEmailEdit.setHintTextColor(getResources().getColor(R.color.colorError, null));
-                    return;
-                }
-                if (password.isEmpty()) {
-                    //MISSING PASSWORD
-                    mErrorText.setText(R.string.missing_password);
-                    mPasswordEdit.setHintTextColor(getResources().getColor(R.color.colorError, null));
-                    return;
-                }
-
-                mWaitingScreen = new WaitingScreen();
-                mWaitingScreen.show(getParentFragmentManager(), null);
-                AuthManager.signIn(email, password,new Thread(){
-                    @Override
-                    // ON A SUCCESSFUL CREATION
-                    public void run(){
-                        FirestoreManager.gatherData(onGatherDataCompleted());
-                    }
-                }, new Thread(){
-                    @Override
-                    // ON A FAILURE
-                    public void run(){
-                        mWaitingScreen.dismiss();
-                        mErrorText.setText(R.string.login_error);
-                    }
-                });
+        mValidateButton.setOnClickListener(v -> {
+            String email = mEmailEdit.getText().toString();
+            String password = mPasswordEdit.getText().toString();
+            if(email.isEmpty()){
+                // MISSING EMAIL
+                mErrorText.setText(R.string.missing_email);
+                mEmailEdit.setHintTextColor(getResources().getColor(R.color.colorError, null));
+                return;
             }
+            if (password.isEmpty()) {
+                //MISSING PASSWORD
+                mErrorText.setText(R.string.missing_password);
+                mPasswordEdit.setHintTextColor(getResources().getColor(R.color.colorError, null));
+                return;
+            }
+
+            mWaitingScreen = new WaitingScreen();
+            mWaitingScreen.show(getParentFragmentManager(), null);
+            AuthManager.signIn(email, password, () -> {
+                FirestoreManager.gatherData(requireContext(), onGatherDataCompleted());
+            },() -> {
+                mWaitingScreen.dismiss();
+                mErrorText.setText(R.string.login_error);
+            });
         });
 
         mSignupButton = dialogView.findViewById(R.id.login_signup_button);
-        mSignupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSignupFragment.show(getParentFragmentManager(),null);
-            }
-        });
+        mSignupButton.setOnClickListener(v -> mSignupFragment.show(getParentFragmentManager(),null));
 
         mGuestButton = dialogView.findViewById(R.id.login_guest_button);
-        mGuestButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mWaitingScreen = new WaitingScreen();
-                mWaitingScreen.show(getParentFragmentManager(), null);
-                FirestoreManager.gatherData(onGatherDataCompleted());
-            }
+        mGuestButton.setOnClickListener(v -> {
+            mWaitingScreen = new WaitingScreen();
+            mWaitingScreen.show(getParentFragmentManager(), null);
+            FirestoreManager.gatherData(requireContext(), onGatherDataCompleted());
         });
 
         this.setCancelable(false);
@@ -123,14 +95,10 @@ public class LoginFragment  extends DialogFragment {
         return dialog;
     }
 
-    private Thread onGatherDataCompleted(){
-        return new Thread(){
-            @Override
-            // ON A SUCCESSFUL GATHERING OF DATABASE ELEMENTS
-            public void run(){
+    private Runnable onGatherDataCompleted(){
+        return () -> {
             mWaitingScreen.dismiss();
             dismiss();
-            }
         };
     }
 

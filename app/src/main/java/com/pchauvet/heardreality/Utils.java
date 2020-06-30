@@ -42,9 +42,16 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 
+import java.io.IOException;
 import java.util.List;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.GeoPoint;
+import com.pchauvet.heardreality.objects.HeardProject;
+import com.pchauvet.heardreality.objects.Range;
 import com.pchauvet.heardreality.thingy.Thingy;
 
 public class Utils {
@@ -94,6 +101,35 @@ public class Utils {
             } catch (Exception ex) {
                 return null;
             }
+        }
+        return null;
+    }
+
+    public static LatLng getProjectStartingPoint(HeardProject project){
+        if (project.getStartingPoint() != null && project.getRanges() != null) {
+            for(Range range : project.getRanges()){
+                // We find the range whose id corresponds to the starting point reference
+                if(range.getId().equals(project.getStartingPoint())){
+                    GeoPoint center;
+                    if(range.getType().equals("CIRCULAR")) {
+                        center = range.getCenter();
+                    } else {
+                        center = range.getPoints().get(0);
+                    }
+                    return new LatLng(center.getLatitude(), center.getLongitude());
+                }
+            }
+        }
+        return null;
+    }
+
+    public static Address getAddressFromLatLng(Context context, LatLng location){
+        Geocoder geoCoder = new Geocoder(context);
+        try {
+            List<Address> matches = geoCoder.getFromLocation(location.latitude, location.longitude, 1);
+            return (matches.isEmpty() ? null : matches.get(0));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }

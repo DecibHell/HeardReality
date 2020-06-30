@@ -100,7 +100,7 @@
     <string name="allow_location_services">Location services are necessary for this application, please grant the permissions.</string>
     <string name="wmf_zoom">Zoom</string>
 
-    <!-- WorldMapFragment List -->
+    <!-- WorldMapFragment Project List -->
     <string name="wmf_list_title">HR Projects</string>
     <string name="wmf_list_all">All</string>
     <string name="wmf_list_downloaded">Downloaded</string>
@@ -109,9 +109,19 @@
     <string name="wmf_by_owner">by %s</string>
     <string name="wmf_list_unpublished">Unpublished \</string>
 
-    <!-- WorldMapFragment Detail -->
+    <!-- WorldMapFragment Project Detail -->
+    <string name="pdf_owner">By %s</string>
+    <string name="pdf_location">Located in %s, %s</string>
+    <string name="pdf_duration">~ %dm</string>
+    <string name="pdf_genre">Genre : %s</string>
+    <string name="pdf_description">Description : %s</string>
+    <string name="pdf_downloads">%d downloads</string>
+    <string name="pdf_download">Download</string>
+    <string name="pdf_delete">Delete from disk</string>
+    <string name="pdf_start">Start</string>
 
-
+    <!-- Waiting Screen -->
+    <string name="ws_progress">%d%%</string>
 
     <!-- IMPORTED FROM THINGY 52 -->
     <string name="thingy_52">Thingy:52 </string>

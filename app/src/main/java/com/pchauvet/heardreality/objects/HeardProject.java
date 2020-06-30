@@ -12,9 +12,19 @@ public class HeardProject {
     private String name;
     private String owner; // reference to a user
     private Date date;
+    private String description; // optional
     private String genre; // optional
     private int duration; // optional
     private int downloads;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     private String startingPoint; // reference to a range in ranges
     private boolean published;
 

@@ -1,15 +1,10 @@
 package com.pchauvet.heardreality;
 
+import android.content.Context;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.pchauvet.heardreality.objects.HeardProject;
 import com.pchauvet.heardreality.objects.Range;
 import com.pchauvet.heardreality.objects.Sound;
@@ -23,8 +18,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import androidx.annotation.NonNull;
-
 import static android.content.ContentValues.TAG;
 
 public class FirestoreManager {
@@ -36,107 +29,99 @@ public class FirestoreManager {
 
     public static FirebaseFirestore db(){
         return FirebaseFirestore.getInstance();
-    };
+    }
 
-    public static void gatherData(final Thread onCompleted){
+    public static void gatherData(final Context context, final Runnable onCompleted){
         final AtomicBoolean oneTaskCompleted = new AtomicBoolean(false);
 
         db().collection("HeardProjects")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            projects = new ArrayList<>();
-                            if (task.getResult() != null) {
-                                final AtomicInteger projectCompletionCounter = new AtomicInteger(0);
-                                final AtomicInteger totalProjects = new AtomicInteger(0);
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    HeardProject project = document.toObject(HeardProject.class);
-                                    // We only fetch projects if they are public or if the authentified user is the owner
-                                    if(project.isPublished() || (AuthManager.currentUser!=null && AuthManager.currentUser.getUid().equals(project.getOwner()))){
-                                        projects.add(project);
-                                        // Gather the data of each project (Ranges, Sounds, Sources)
-                                        totalProjects.incrementAndGet();
-                                        gatherProjectData(project.getId(), new Thread(){
-                                            @Override
-                                            public void run(){
-                                                // Check if all the projects have been gathered properly
-                                                if(projectCompletionCounter.incrementAndGet() == totalProjects.get()){
-                                                    notifyProjectsChanged();
-                                                    // Check if the users have been gathered too, to send onCompleted
-                                                    if(oneTaskCompleted.get()){
-                                                        onCompleted.start();
-                                                    }else{
-                                                        oneTaskCompleted.set(true);
-                                                    }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        projects = new ArrayList<>();
+                        if (task.getResult() != null) {
+                            final AtomicInteger projectCompletionCounter = new AtomicInteger(0);
+                            final AtomicInteger totalProjects = new AtomicInteger(0);
+                            // PROCESS ALL PROJECTS
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                HeardProject project = document.toObject(HeardProject.class);
+                                // We only fetch projects if they are public or if the authentified user is the owner
+                                if(project.isPublished() || (AuthManager.currentUser!=null && AuthManager.currentUser.getUid().equals(project.getOwner()))){
+                                    projects.add(project);
+                                    // Gather the data of each project (Ranges, Sounds, Sources)
+                                    totalProjects.incrementAndGet();
+                                    gatherProjectData(project.getId(), new Thread(){
+                                        @Override
+                                        public void run(){
+                                            // Check if all the projects have been gathered properly
+                                            if(projectCompletionCounter.incrementAndGet() == totalProjects.get()){
+                                                notifyProjectsChanged(context);
+                                                // Check if the users have been gathered too, to send onCompleted
+                                                if(oneTaskCompleted.get()){
+                                                    onCompleted.run();
+                                                }else{
+                                                    oneTaskCompleted.set(true);
                                                 }
                                             }
-                                        });
-                                    }
+                                        }
+                                    });
                                 }
                             }
-                        } else {
-                            Log.e(TAG, "Error getting projects.", task.getException());
-                            if(oneTaskCompleted.get()){
-                                onCompleted.start();
-                            }else{
-                                oneTaskCompleted.set(true);
-                            }
                         }
-                    }
-                });
-
-        db().collection("Users")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            users = new ArrayList<>();
-                            if (task.getResult() != null) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    users.add(document.toObject(User.class));
-                                }
-                            }
-                        } else {
-                            Log.e(TAG, "Error getting users.", task.getException());
-                        }
-                        // We send onCompleted only if the other task completed
+                    } else {
+                        Log.e(TAG, "Error getting projects.", task.getException());
                         if(oneTaskCompleted.get()){
-                            onCompleted.start();
+                            onCompleted.run();
                         }else{
                             oneTaskCompleted.set(true);
                         }
                     }
                 });
 
+        db().collection("Users")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        users = new ArrayList<>();
+                        if (task.getResult() != null) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                users.add(document.toObject(User.class));
+                            }
+                        }
+                    } else {
+                        Log.e(TAG, "Error getting users.", task.getException());
+                    }
+                    // We send onCompleted only if the other task completed
+                    if(oneTaskCompleted.get()){
+                        onCompleted.run();
+                    }else{
+                        oneTaskCompleted.set(true);
+                    }
+                });
+
     }
 
-    public static void gatherProjectData(final String projectId, final Thread onCompleted){
+    public static void gatherProjectData(final String projectId, final Runnable onCompleted){
         final AtomicInteger completionCount = new AtomicInteger(0);
 
         db().collection("HeardProjects")
                 .document(projectId)
                 .collection("Ranges")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            List<Range> ranges = new ArrayList<>();
-                            if (task.getResult() != null) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    ranges.add(document.toObject(Range.class));
-                                }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Range> ranges = new ArrayList<>();
+                        if (task.getResult() != null) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                ranges.add(document.toObject(Range.class));
                             }
-                            getProject(projectId).setRanges(ranges);
-                        } else {
-                            Log.e(TAG, "Error getting Ranges from project "+projectId, task.getException());
                         }
-                        if(completionCount.incrementAndGet() == 3){
-                            onCompleted.start();
-                        }
+                        getProject(projectId).setRanges(ranges);
+                    } else {
+                        Log.e(TAG, "Error getting Ranges from project "+projectId, task.getException());
+                    }
+                    if(completionCount.incrementAndGet() == 3){
+                        onCompleted.run();
                     }
                 });
 
@@ -144,23 +129,20 @@ public class FirestoreManager {
                 .document(projectId)
                 .collection("Sounds")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            List<Sound> sounds = new ArrayList<>();
-                            if (task.getResult() != null) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    sounds.add(document.toObject(Sound.class));
-                                }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Sound> sounds = new ArrayList<>();
+                        if (task.getResult() != null) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                sounds.add(document.toObject(Sound.class));
                             }
-                            getProject(projectId).setSounds(sounds);
-                        } else {
-                            Log.e(TAG, "Error getting Sounds from project "+projectId, task.getException());
                         }
-                        if(completionCount.incrementAndGet() == 3){
-                            onCompleted.start();
-                        }
+                        getProject(projectId).setSounds(sounds);
+                    } else {
+                        Log.e(TAG, "Error getting Sounds from project "+projectId, task.getException());
+                    }
+                    if(completionCount.incrementAndGet() == 3){
+                        onCompleted.run();
                     }
                 });
 
@@ -168,68 +150,56 @@ public class FirestoreManager {
                 .document(projectId)
                 .collection("Sources")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            List<Source> sources = new ArrayList<>();
-                            if (task.getResult() != null) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    sources.add(document.toObject(Source.class));
-                                }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Source> sources = new ArrayList<>();
+                        if (task.getResult() != null) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                sources.add(document.toObject(Source.class));
                             }
-                            getProject(projectId).setSources(sources);
-                        } else {
-                            Log.e(TAG, "Error getting Sources from project "+projectId, task.getException());
                         }
-                        if(completionCount.incrementAndGet() == 3){
-                            onCompleted.start();
-                        }
+                        getProject(projectId).setSources(sources);
+                    } else {
+                        Log.e(TAG, "Error getting Sources from project "+projectId, task.getException());
+                    }
+                    if(completionCount.incrementAndGet() == 3){
+                        onCompleted.run();
                     }
                 });
     }
 
-    public static void isUsernameDuplicate(String name, final Thread ifTrue, final Thread ifFalse){
+    public static void isUsernameDuplicate(String name, final Runnable ifTrue, final Runnable ifFalse){
         db().collection("Users")
                 .whereEqualTo("name", name)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            if(task.getResult() != null && !task.getResult().isEmpty()){
-                                // WE FOUND A DUPLICATE
-                                ifTrue.start();
-                            }else{
-                                ifFalse.start();
-                            }
-                        } else {
-                            Log.e(TAG, "Error getting documents.", task.getException());
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if(task.getResult() != null && !task.getResult().isEmpty()){
+                            // WE FOUND A DUPLICATE
+                            ifTrue.run();
+                        }else{
+                            ifFalse.run();
                         }
+                    } else {
+                        Log.e(TAG, "Error getting documents.", task.getException());
                     }
                 });
     }
 
-    public static void createUser(String name, final Thread onSuccess, final Thread onFailure){
+    public static void createUser(String name, final Runnable onSuccess, final Runnable onFailure){
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);
         // CREATE A NEW USER IN THE USERS COLLECTION WITH THE CURRENT CONNECTED USER'S ID (FRESHLY CREATED)
         db().collection("Users")
                 .document(AuthManager.currentUser.getUid())
                 .set(user)
-                .addOnSuccessListener(new OnSuccessListener() {
-                    @Override
-                    public void onSuccess(Object o) {
-                        Log.d(TAG, "DocumentSnapshot added for User");
-                        onSuccess.start();
-                    }
+                .addOnSuccessListener(o -> {
+                    Log.d(TAG, "DocumentSnapshot added for User");
+                    onSuccess.run();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error adding document in Users collection", e);
-                        onFailure.start();
-                    }
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error adding document in Users collection", e);
+                    onFailure.run();
                 });
     }
 
@@ -256,14 +226,11 @@ public class FirestoreManager {
         db().collection("Users")
                 .document(userId)
                 .update(field, value)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d("","User correctly updated");
-                        } else {
-                            Log.e(TAG, "Error updating user", task.getException());
-                        }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("","User correctly updated");
+                    } else {
+                        Log.e(TAG, "Error updating user", task.getException());
                     }
                 });
     }
@@ -273,8 +240,8 @@ public class FirestoreManager {
         void onProjectsChanged();
     }
 
-    public static void notifyProjectsChanged(){
-        StorageManager.checkDownloaded();
+    public static void notifyProjectsChanged(Context context){
+        StorageManager.checkDownloaded(context);
         for(DBChangeListener listener : dbChangeListeners){
             listener.onProjectsChanged();
         }
