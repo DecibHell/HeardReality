@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.pchauvet.heardreality.MainActivity;
 import com.pchauvet.heardreality.MathUtils.EulerAngles;
 import com.pchauvet.heardreality.R;
 
@@ -76,8 +77,8 @@ public class HTConfigFragment extends DialogFragment{
 
             deviceName = mNameTextview.getText().toString();
 
-            final HTConfigFragmentListener listener = (HTConfigFragmentListener) requireActivity();
-            listener.onNameChanged(deviceName);
+            final MainActivity mainActivity = (MainActivity) requireActivity();
+            mainActivity.onNameChanged(deviceName);
         });
 
         mCancelName.setOnClickListener(v -> {
@@ -90,12 +91,12 @@ public class HTConfigFragment extends DialogFragment{
         });
 
         mCalibrateButton = dialogView.findViewById(R.id.ht_config_calibrate);
-        mCalibrateButton.setOnClickListener(v -> mCalibrationFragment.show(requireActivity().getSupportFragmentManager(),null));
+        mCalibrateButton.setOnClickListener(v -> mCalibrationFragment.show(getChildFragmentManager(),null));
 
         mDisconnectButton = dialogView.findViewById(R.id.ht_config_disconnect);
         mDisconnectButton.setOnClickListener(v -> {
-            final HTConfigFragmentListener listener = (HTConfigFragmentListener) requireActivity();
-            listener.onDisconnectOrder();
+            final MainActivity mainActivity = (MainActivity) requireActivity();
+            mainActivity.onDisconnectOrder();
 
             dismiss();
         });
@@ -109,8 +110,7 @@ public class HTConfigFragment extends DialogFragment{
         dialog.setContentView(dialogView);
 
         Window window = dialog.getWindow();
-        int width = getResources().getDimensionPixelSize(R.dimen.dialog_large_width);
-        window.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         mCalibrationFragment = new HTCalibrationFragment();
@@ -165,11 +165,5 @@ public class HTConfigFragment extends DialogFragment{
 
         this.yaw = orientation.yaw;
         this.pitch = orientation.pitch;
-    }
-
-    public interface HTConfigFragmentListener {
-        void onNameChanged(String name);
-
-        void onDisconnectOrder();
     }
 }

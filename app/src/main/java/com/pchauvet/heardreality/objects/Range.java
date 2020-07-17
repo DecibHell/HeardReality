@@ -6,6 +6,8 @@ import com.google.type.LatLng;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
+
 public class Range {
     @DocumentId
     private String id;
@@ -15,7 +17,7 @@ public class Range {
 
     // CIRCULAR RANGE
     private GeoPoint center;
-    private Double radius;
+    private Double radius; // meters
 
     // POLYGONAL RANGE
     private List<GeoPoint> points;

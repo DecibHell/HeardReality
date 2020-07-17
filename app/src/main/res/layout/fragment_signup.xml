@@ -76,7 +76,7 @@
         android:layout_gravity="center|bottom"
         android:text="@string/signup_validate_button"
         android:layout_margin="15dp"
-        android:backgroundTint="@color/lightGrey"/>
+        style="@style/ButtonON"/>
 
     <Button
         android:id="@+id/signup_cancel_button"
@@ -84,7 +84,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|bottom"
         android:text="@string/signup_cancel_button"
-        android:backgroundTint="@color/lightGrey"/>
+        style="@style/ButtonON"/>
 
 </LinearLayout>
 

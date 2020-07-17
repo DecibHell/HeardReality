@@ -10,9 +10,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.pchauvet.heardreality.FirestoreManager;
+import com.pchauvet.heardreality.MainActivity;
 import com.pchauvet.heardreality.R;
 import com.pchauvet.heardreality.StorageManager;
 import com.pchauvet.heardreality.Utils;
@@ -116,7 +116,9 @@ public class ProjectDetailsFragment  extends Fragment {
 
         startButton = view.findViewById(R.id.pdf_start);
         startButton.setOnClickListener(v -> {
-
+            if(Utils.getProjectStartingRange(project) != null) {
+                ((MainActivity) requireActivity()).openStartingProjectFragment(project);
+            }
         });
 
         deleteButton = view.findViewById(R.id.pdf_delete);
@@ -138,10 +140,5 @@ public class ProjectDetailsFragment  extends Fragment {
 
     private void updateInterface(){
         getParentFragmentManager().beginTransaction().replace(R.id.wmf_project_details_placeholder, new ProjectDetailsFragment(project)).commit();
-        for (Fragment fragment : getParentFragmentManager().getFragments()){
-            if(fragment instanceof WorldMapFragment){
-                ((WorldMapFragment) fragment).updateProjectList();
-            }
-        }
     }
 }

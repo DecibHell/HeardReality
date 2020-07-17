@@ -44,6 +44,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 
 import java.io.IOException;
 import java.util.List;
@@ -105,20 +106,32 @@ public class Utils {
         return null;
     }
 
-    public static LatLng getProjectStartingPoint(HeardProject project){
+    public static Range getProjectStartingRange(HeardProject project){
         if (project.getStartingPoint() != null && project.getRanges() != null) {
             for(Range range : project.getRanges()){
                 // We find the range whose id corresponds to the starting point reference
                 if(range.getId().equals(project.getStartingPoint())){
-                    GeoPoint center;
-                    if(range.getType().equals("CIRCULAR")) {
-                        center = range.getCenter();
-                    } else {
-                        center = range.getPoints().get(0);
-                    }
-                    return new LatLng(center.getLatitude(), center.getLongitude());
+                    return range;
                 }
             }
+        }
+        return null;
+    }
+
+    public static LatLng getLatLngFromGeoPoint(GeoPoint geoPoint){ return new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude()); }
+
+    public static LatLng getLatLngFromLocation(Location location){ return new LatLng(location.getLatitude(), location.getLongitude()); }
+
+    public static LatLng getProjectStartingPoint(HeardProject project){
+        Range range = getProjectStartingRange(project);
+        if (range != null) {
+            GeoPoint center;
+            if(range.getType().equals("CIRCULAR")) {
+                center = range.getCenter();
+            } else {
+                center = range.getPoints().get(0);
+            }
+            return getLatLngFromGeoPoint(center);
         }
         return null;
     }

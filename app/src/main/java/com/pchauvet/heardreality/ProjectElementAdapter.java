@@ -1,6 +1,5 @@
 package com.pchauvet.heardreality;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,23 +7,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.pchauvet.heardreality.fragments.ProjectDetailsFragment;
 import com.pchauvet.heardreality.fragments.WorldMapFragment;
 import com.pchauvet.heardreality.objects.HeardProject;
 import com.pchauvet.heardreality.objects.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentTransaction;
 
 public class ProjectElementAdapter  extends ArrayAdapter<HeardProject>{
 
@@ -34,7 +28,7 @@ public class ProjectElementAdapter  extends ArrayAdapter<HeardProject>{
 
     private View view;
 
-    private View wmfView;
+    private WorldMapFragment wmFragment;
 
     private TextView projectName;
     private TextView projectOwner;
@@ -42,14 +36,12 @@ public class ProjectElementAdapter  extends ArrayAdapter<HeardProject>{
     private ImageView projectDownloaded;
     private ImageButton projectDetail;
 
-    private FragmentTransaction fragmentTransaction;
-
-    public ProjectElementAdapter(Context context, View wmfView) {
+    public ProjectElementAdapter(Context context, WorldMapFragment wmFragment) {
         super(context, R.layout.project_list_element, FirestoreManager.projects);
         this.projects = new ArrayList<>(FirestoreManager.projects);
         this.filteredProjects = new ArrayList<>(FirestoreManager.projects);
 
-        this.wmfView = wmfView;
+        this.wmFragment = wmFragment;
     }
 
     public void updateItems() {
@@ -87,13 +79,10 @@ public class ProjectElementAdapter  extends ArrayAdapter<HeardProject>{
 
         projectDetail = this.view.findViewById(R.id.ple_detail);
         projectDetail.setFocusable(false);
-        // When clicking on the view button, display the details of the project
+        // When clicking on the view button, click on the parent, and display the details of the project
         projectDetail.setOnClickListener(v -> {
-            fragmentTransaction = ((FragmentActivity)(wmfView.getContext())).getSupportFragmentManager().beginTransaction();
-
-            ProjectDetailsFragment projectDetailsFragment = new ProjectDetailsFragment(project);
-            fragmentTransaction.replace(R.id.wmf_project_details_placeholder, projectDetailsFragment);
-            fragmentTransaction.commit();
+            wmFragment.focusOnProject(project);
+            wmFragment.displayProjectDetails(project);
         });
 
         this.view.setBackground(position%2 == 0 ? this.view.getResources().getDrawable(R.color.white, null) : this.view.getResources().getDrawable(R.color.lightGrey, null));
@@ -158,5 +147,9 @@ public class ProjectElementAdapter  extends ArrayAdapter<HeardProject>{
             }
         }
 
+    }
+
+    public interface ProjectElementAdapterListener {
+        void onViewDetails(HeardProject project);
     }
 }

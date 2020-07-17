@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.pchauvet.heardreality"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -45,6 +45,9 @@ dependencies {
     implementation project(':thingylib')
     // Scanner Compat library
     implementation 'no.nordicsemi.android.support.v18:scanner:1.4.3'
+
+    // Utilities for Maps SDK for Android (requires Google Play Services)
+    implementation 'com.google.maps.android:android-maps-utils:2.0.3'
 
     // Google VR Resonance
     // Adds Google VR spatial audio support

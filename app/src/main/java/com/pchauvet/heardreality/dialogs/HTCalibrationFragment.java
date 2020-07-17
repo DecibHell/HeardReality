@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.pchauvet.heardreality.MainActivity;
 import com.pchauvet.heardreality.R;
 
 import androidx.annotation.NonNull;
@@ -51,8 +52,8 @@ public class HTCalibrationFragment extends DialogFragment implements SensorEvent
 
         mValidateButton = dialogView.findViewById(R.id.ht_calibration_validate);
         mValidateButton.setOnClickListener(v -> {
-            final HTCalibrationFragmentListener listener = (HTCalibrationFragmentListener) requireActivity();
-            listener.onCalibration();
+            final MainActivity mainActivity = (MainActivity) requireActivity();
+            mainActivity.onCalibration();
 
             dismiss();
         });
@@ -62,7 +63,7 @@ public class HTCalibrationFragment extends DialogFragment implements SensorEvent
 
         Window window = dialog.getWindow();
         int width = getResources().getDimensionPixelSize(R.dimen.dialog_large_width);
-        window.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         return dialog;
@@ -113,9 +114,5 @@ public class HTCalibrationFragment extends DialogFragment implements SensorEvent
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
-
-    public interface HTCalibrationFragmentListener {
-        void onCalibration();
     }
 }

@@ -6,57 +6,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/wmf_map_fragment"
+    <fragment
+        android:id="@+id/wmf_map"
+        class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/wmf_projects_fragment">
-
-        <fragment
-            android:id="@+id/wmf_map"
-            class="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <ImageButton
-            android:id="@+id/wmf_center_user"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/round_button"
-            android:padding="5dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_mylocation" />
-
-        <SeekBar
-            android:id="@+id/wmf_zoom"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:layout_width="171dp"
-            android:layout_height="29dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:max="4"
-            android:orientation="vertical"
-            android:progress="1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/wmf_zoom"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="@+id/wmf_zoom"
-            app:layout_constraintEnd_toStartOf="@+id/wmf_zoom"
-            app:layout_constraintTop_toTopOf="@+id/wmf_zoom" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintBottom_toTopOf="@id/wmf_projects_fragment"/>
 
     <LinearLayout
         android:id="@+id/wmf_projects_fragment"

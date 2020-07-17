@@ -47,6 +47,7 @@ public class StorageManager {
                                 if (gotNoFailure.get()) {
                                     Log.v("", "Successfully downloaded all the sounds");
                                     downloadedProjects.add(projectId);
+                                    notifyDownloadsChanged(context);
                                     ws.dismiss();
                                     onSuccess.run();
                                 } else {
@@ -103,10 +104,23 @@ public class StorageManager {
             }
             new File(context.getFilesDir(), ownerId+"/"+projectId).delete();
             downloadedProjects.remove(projectId);
+            notifyDownloadsChanged(context);
             return true;
         } else {
             Log.v("", "No sounds to delete");
             return false;
+        }
+    }
+
+    public static List<StorageManager.StorageChangeListener> storageChangeListeners = new ArrayList<>();
+    public interface StorageChangeListener {
+        void onDownloadsChanged();
+    }
+
+    public static void notifyDownloadsChanged(Context context){
+        StorageManager.checkDownloaded(context);
+        for(StorageManager.StorageChangeListener listener : storageChangeListeners){
+            listener.onDownloadsChanged();
         }
     }
 }

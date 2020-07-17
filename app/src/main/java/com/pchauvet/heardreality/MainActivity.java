@@ -15,7 +15,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,13 +32,16 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.material.button.MaterialButton;
 import com.pchauvet.heardreality.MathUtils.Quaternion;
 import com.pchauvet.heardreality.database.DatabaseHelper;
-import com.pchauvet.heardreality.dialogs.HTCalibrationFragment;
 import com.pchauvet.heardreality.dialogs.HTConfigFragment;
 import com.pchauvet.heardreality.dialogs.LoginFragment;
 import com.pchauvet.heardreality.dialogs.PermissionRationaleDialogFragment;
 import com.pchauvet.heardreality.dialogs.ScannerFragment;
 import com.pchauvet.heardreality.dialogs.UserProfileFragment;
+import com.pchauvet.heardreality.fragments.PlayingProjectFragment;
+import com.pchauvet.heardreality.fragments.StartingProjectFragment;
 import com.pchauvet.heardreality.fragments.WorldMapFragment;
+import com.pchauvet.heardreality.objects.HeardProject;
+import com.pchauvet.heardreality.thingy.EmptyThingyListener;
 import com.pchauvet.heardreality.thingy.Thingy;
 import com.pchauvet.heardreality.thingy.ThingyService;
 
@@ -58,11 +60,7 @@ import static com.pchauvet.heardreality.Utils.REQUEST_ENABLE_BT;
 import static com.pchauvet.heardreality.Utils.getBluetoothDevice;
 import static no.nordicsemi.android.thingylib.utils.ThingyUtils.showToast;
 
-public class MainActivity extends AppCompatActivity implements ThingySdkManager.ServiceConnectionListener,
-        PermissionRationaleDialogFragment.PermissionDialogListener,
-        ScannerFragment.ScannerFragmentListener,
-        HTConfigFragment.HTConfigFragmentListener,
-        HTCalibrationFragment.HTCalibrationFragmentListener{
+public class MainActivity extends AppCompatActivity implements ThingySdkManager.ServiceConnectionListener{
 
     private Toolbar mActivityToolbar;
 
@@ -103,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
 
     private UserProfileFragment mUserProfileFragment;
 
-    private ThingyListener mThingyListener = new ThingyListener() {
+    private ThingyListener mThingyListener = new EmptyThingyListener() {
         @Override
         public void onDeviceConnected(BluetoothDevice device, int connectionState) {
             mDevice = device;
@@ -111,6 +109,11 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
                 mConnectedBleDeviceList.add(device);
             }
             updateUiOnDeviceConnected();
+
+            // Notify listeners of the change
+            for (MainActivityListener listener : listeners){
+                listener.onDeviceConnected(getDeviceName());
+            }
         }
 
         @Override
@@ -120,25 +123,19 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
             updateBatteryLevelVisibility(View.GONE);
             updateUiOnDeviceDisconnected();
 
+            // Notify listeners of the change
+            for (MainActivityListener listener : listeners){
+                listener.onDeviceDisconnected();
+            }
         }
 
         @Override
         public void onServiceDiscoveryCompleted(BluetoothDevice device) {
             updateBatteryLevelVisibility(View.VISIBLE);
             updateBatteryLevel(mThingySdkManager.getBatteryLevel(mDevice));
-            onServiceDiscoveryCompletion(device);
-        }
 
-        private void onServiceDiscoveryCompletion(final BluetoothDevice device) {
             mThingySdkManager.enableBatteryLevelNotifications(device, true);
-            mThingySdkManager.enableOrientationNotifications(mDevice, true);
-            mThingySdkManager.enableHeadingNotifications(mDevice, true);
-            mThingySdkManager.enableTapNotifications(mDevice, true);
             mThingySdkManager.enableQuaternionNotifications(mDevice, true);
-            mThingySdkManager.enablePedometerNotifications(mDevice, true);
-            mThingySdkManager.enableGravityVectorNotifications(mDevice, true);
-            mThingySdkManager.enableRawDataNotifications(mDevice, true);
-            mThingySdkManager.enableEulerNotifications(mDevice, true);
         }
 
         @Override
@@ -147,51 +144,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
             if (bluetoothDevice.equals(mThingySdkManager.getSelectedDevice())) {
                     updateBatteryLevel(batteryLevel);
             }
-        }
-
-        @Override
-        public void onTemperatureValueChangedEvent(BluetoothDevice bluetoothDevice, String temperature) {
-        }
-
-        @Override
-        public void onPressureValueChangedEvent(BluetoothDevice bluetoothDevice, String pressure) {
-        }
-
-        @Override
-        public void onHumidityValueChangedEvent(BluetoothDevice bluetoothDevice, String humidity) {
-
-        }
-
-        @Override
-        public void onAirQualityValueChangedEvent(BluetoothDevice bluetoothDevice, final int eco2, final int tvoc) {
-
-        }
-
-        @Override
-        public void onColorIntensityValueChangedEvent(BluetoothDevice bluetoothDevice, float red, float green, float blue, float alpha) {
-
-        }
-
-        @Override
-        public void onButtonStateChangedEvent(BluetoothDevice bluetoothDevice, final int buttonState) {
-            if (bluetoothDevice.equals(mDevice)) {
-                switch (buttonState) {
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        @Override
-        public void onTapValueChangedEvent(final BluetoothDevice bluetoothDevice, final int direction, final int count) {
-        }
-
-        @Override
-        public void onOrientationValueChangedEvent(final BluetoothDevice bluetoothDevice, final int orientation) {
         }
 
         @Override
@@ -210,58 +162,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
             if(mConfigFragment.isAdded()) {
                 mConfigFragment.onOrientationChanged(quaternionCalibrated.toEulerAngles());
             }
-        }
-
-        @Override
-        public void onPedometerValueChangedEvent(final BluetoothDevice bluetoothDevice, final int steps, final long duration) {
-
-        }
-
-        @Override
-        public void onAccelerometerValueChangedEvent(final BluetoothDevice bluetoothDevice, final float x, final float y, final float z) {
-
-        }
-
-        @Override
-        public void onGyroscopeValueChangedEvent(final BluetoothDevice bluetoothDevice, final float x, final float y, final float z) {
-
-        }
-
-        @Override
-        public void onCompassValueChangedEvent(final BluetoothDevice bluetoothDevice, final float x, final float y, final float z) {
-            if( x!= 0 || y!=0 || z!=0){
-                //Log.v(ThingyUtils.TAG, "x : " + x + "/ y : " + y + "/ z : " + z);
-            }
-        }
-
-        @Override
-        public void onEulerAngleChangedEvent(final BluetoothDevice bluetoothDevice, final float roll, final float pitch, final float yaw) {
-            //Log.v(ThingyUtils.TAG, "Roll : " + roll + "/ Pitch : " + pitch + "/ Yaw : " + yaw);
-        }
-
-        @Override
-        public void onRotationMatrixValueChangedEvent(final BluetoothDevice bluetoothDevice, final byte[] matrix) {
-
-        }
-
-        @Override
-        public void onHeadingValueChangedEvent(final BluetoothDevice bluetoothDevice, final float heading) {
-
-        }
-
-        @Override
-        public void onGravityVectorChangedEvent(final BluetoothDevice bluetoothDevice, final float x, final float y, final float z) {
-
-        }
-
-        @Override
-        public void onSpeakerStatusValueChangedEvent(final BluetoothDevice bluetoothDevice, final int status) {
-
-        }
-
-        @Override
-        public void onMicrophoneValueChangedEvent(final BluetoothDevice bluetoothDevice, final byte[] data) {
-
         }
     };
 
@@ -314,12 +214,8 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         // LOAD AUDIO ENGINE
         mAudioProcess = new AudioProcess(this);
 
-        // LOAD WORLD MAP FRAGMENT
-        fragmentTransaction = mFragmentManager.beginTransaction();
-
-        WorldMapFragment worldMapFragment = new WorldMapFragment();
-        fragmentTransaction.replace(R.id.fragment_container, worldMapFragment);
-        fragmentTransaction.commit();
+        // OPEN THE WORLD MAP FRAGMENT AT START
+        openWorldMapFragment();
 
         // CONNECT TO FIRESTORE
         mLoginFragment = new LoginFragment();
@@ -328,6 +224,9 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
 
         mUserProfileFragment = new UserProfileFragment();
+
+        // Initialize an empty list of listeners
+        listeners = new ArrayList<>();
     }
 
     @Override
@@ -372,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("",getSupportFragmentManager().getFragments().toString());
+        // Log.e("",getSupportFragmentManager().getFragments().toString());
     }
 
     @Override
@@ -394,7 +293,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
     }
 
-    @Override
     public void onDeviceSelected(final BluetoothDevice device, final String name) {
         if (mThingySdkManager != null) {
             mThingySdkManager.connectToThingy(this, device, ThingyService.class);
@@ -411,10 +309,12 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
             mThingySdkManager.setSelectedDevice(mDevice);
         }
         updateSelectionInDb(new Thingy(mDevice), true);
-    }
+        updateUiOnDeviceConnected();
 
-    @Override
-    public void onNothingSelected() {
+        // Notify listeners of the change
+        for (MainActivityListener listener : listeners){
+            listener.onDeviceConnected(getDeviceName());
+        }
     }
 
     private void updateSelectionInDb(final Thingy thingy, final boolean selected) {
@@ -458,6 +358,7 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
     }
 
+    // Connects to a thingy on a scan callback
     private void connect() {
         mThingySdkManager.connectToThingy(this, mDevice, ThingyService.class);
         final Thingy thingy = new Thingy(mDevice);
@@ -470,7 +371,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         final Thingy thingy = new Thingy(device);
         mThingySdkManager.setSelectedDevice(device);
         updateSelectionInDb(thingy, true);
-        updateUiOnDeviceConnected();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -568,6 +468,36 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
     }
 
+    private void onClickConnect(){
+        if (!isBleEnabled()) {
+            enableBle();
+        }
+        if(!mScannerFragment.isAdded()){
+            mScannerFragment.show(getSupportFragmentManager(), null);
+        }
+    }
+
+    private void onClickConfig(){
+        mConfigFragment.setDeviceName(getDeviceName());
+        if(!mConfigFragment.isAdded()) {
+            mConfigFragment.show(getSupportFragmentManager(), null);
+        }
+    }
+
+    public String getDeviceName(){
+        String deviceName = null;
+        if (mDevice != null) {
+            final String address = mDevice.getAddress();
+            if (mDatabaseHelper.isExist(address)) {
+                deviceName = mDatabaseHelper.getDeviceName(mDevice.getAddress());
+            }
+            if (deviceName == null || deviceName.isEmpty()) {
+                deviceName = mDevice.getName();
+            }
+        }
+        return deviceName;
+    }
+
     @Override
     public void onServiceConnected() {
         //Use this binder to access you own methods declared in the ThingyService
@@ -595,42 +525,21 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
     }
 
-    @Override
     public void onRequestPermission(final String permission, final int requestCode) {
         ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
     }
 
-    @Override
     public void onCancellingPermissionRationale() {
         showToast(this, getString(R.string.requested_permission_not_granted_rationale));
     }
 
-    private void onClickConnect(){
-        if (!isBleEnabled()) {
-            enableBle();
-        }
-        if(!mScannerFragment.isAdded()){
-            mScannerFragment.show(getSupportFragmentManager(), null);
-        }
-    }
-
-    private void onClickConfig(){
-        mConfigFragment.setDeviceName(getDeviceName());
-        if(!mConfigFragment.isAdded()) {
-            mConfigFragment.show(getSupportFragmentManager(), null);
-        }
-    }
-
-    @Override
     public void onNameChanged(String name) {
         mThingySdkManager.setDeviceName(mDevice, name);
         mDatabaseHelper.updateDeviceName(mDevice.getAddress(), name);
-        Log.println(Log.ERROR,"","New name : " + getDeviceName());
 
         updateHTStatus();
     }
 
-    @Override
     public void onDisconnectOrder() {
         mDatabaseHelper.removeDevice(mDevice.getAddress());
         if (mThingySdkManager.isConnected(mDevice)) {
@@ -641,22 +550,32 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
     }
 
-    private String getDeviceName(){
-        String deviceName = null;
-        if (mDevice != null) {
-            final String address = mDevice.getAddress();
-            if (mDatabaseHelper.isExist(address)) {
-                deviceName = mDatabaseHelper.getDeviceName(mDevice.getAddress());
-            }
-            if (deviceName == null || deviceName.isEmpty()) {
-                deviceName = mDevice.getName();
-            }
-        }
-        return deviceName;
+    public void onCalibration() { quaternionRef = quaternionReading.copy(); }
+
+    public void openWorldMapFragment(){
+        fragmentTransaction = mFragmentManager.beginTransaction();
+        WorldMapFragment worldMapFragment = new WorldMapFragment();
+        fragmentTransaction.replace(R.id.fragment_container, worldMapFragment);
+        fragmentTransaction.commit();
     }
 
-    @Override
-    public void onCalibration() {
-        quaternionRef = quaternionReading.copy();
+    public void openStartingProjectFragment(HeardProject project){
+        fragmentTransaction = mFragmentManager.beginTransaction();
+        StartingProjectFragment startingProjectFragment = new StartingProjectFragment(project);
+        fragmentTransaction.replace(R.id.fragment_container, startingProjectFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void openPlayingProjectFragment(HeardProject project){
+        fragmentTransaction = mFragmentManager.beginTransaction();
+        PlayingProjectFragment playingProjectFragment = new PlayingProjectFragment(project);
+        fragmentTransaction.replace(R.id.fragment_container, playingProjectFragment);
+        fragmentTransaction.commit();
+    }
+
+    public ArrayList<MainActivityListener> listeners;
+    public interface MainActivityListener{
+        void onDeviceConnected(String deviceName);
+        void onDeviceDisconnected();
     }
 }

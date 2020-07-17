@@ -2,9 +2,6 @@ package com.pchauvet.heardreality.dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.RotateDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,12 +11,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.pchauvet.heardreality.AuthManager;
 import com.pchauvet.heardreality.FirestoreManager;
-import com.pchauvet.heardreality.MathUtils.EulerAngles;
 import com.pchauvet.heardreality.R;
 import com.pchauvet.heardreality.objects.User;
 
@@ -152,8 +146,7 @@ public class UserProfileFragment extends DialogFragment {
         dialog.setContentView(dialogView);
         Window window = dialog.getWindow();
 
-        int width = getResources().getDimensionPixelSize(R.dimen.dialog_large_width);
-        window.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         return dialog;

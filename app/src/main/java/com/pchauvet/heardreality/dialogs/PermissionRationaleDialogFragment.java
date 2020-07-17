@@ -41,6 +41,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import com.pchauvet.heardreality.MainActivity;
 import com.pchauvet.heardreality.R;
 
 import androidx.annotation.NonNull;
@@ -78,12 +79,6 @@ public class PermissionRationaleDialogFragment extends DialogFragment implements
         }
     }
 
-    public interface PermissionDialogListener {
-        void onRequestPermission(final String permission, final int requestCode);
-
-        void onCancellingPermissionRationale();
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
@@ -99,19 +94,9 @@ public class PermissionRationaleDialogFragment extends DialogFragment implements
     @Override
     public void onClick(final DialogInterface dialogInterface, final int position) {
         if (position == DialogInterface.BUTTON_POSITIVE) {
-            Fragment fragment = getParentFragment();
-            if (fragment != null) {
-                ((PermissionDialogListener) getParentFragment()).onRequestPermission(mPermission, mRequestCode);
-            } else {
-                ((PermissionDialogListener) requireActivity()).onRequestPermission(mPermission, mRequestCode);
-            }
+            ((MainActivity) requireActivity()).onRequestPermission(mPermission, mRequestCode);
         } else if (position == DialogInterface.BUTTON_NEGATIVE) {
-            Fragment fragment = getParentFragment();
-            if (fragment != null) {
-                ((PermissionDialogListener) getParentFragment()).onCancellingPermissionRationale();
-            } else {
-                ((PermissionDialogListener) requireActivity()).onCancellingPermissionRationale();
-            }
+            ((MainActivity) requireActivity()).onCancellingPermissionRationale();
         }
     }
 }

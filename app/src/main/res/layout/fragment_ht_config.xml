@@ -56,11 +56,12 @@
                 android:layout_weight="1"
                 android:enabled="false"
                 android:inputType="text"
+                android:maxLength="8"
                 android:paddingEnd="0dp"
                 android:paddingStart="4dp"
                 android:singleLine="true"
                 android:textColor="@color/black"
-                android:textColorLink="@color/colorAccent"/>
+                android:textColorLink="@color/colorAccent" />
 
             <ImageButton
                 android:id="@+id/ht_config_edit_name"

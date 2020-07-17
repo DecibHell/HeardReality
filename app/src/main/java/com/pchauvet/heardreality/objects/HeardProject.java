@@ -17,6 +17,13 @@ public class HeardProject {
     private int duration; // optional
     private int downloads;
 
+    private String startingPoint; // reference to a range in ranges
+    private boolean published;
+
+    private List<Sound> sounds;
+    private List<Source> sources;
+    private List<Range> ranges;
+
     public String getDescription() {
         return description;
     }
@@ -25,9 +32,6 @@ public class HeardProject {
         this.description = description;
     }
 
-    private String startingPoint; // reference to a range in ranges
-    private boolean published;
-
     public boolean isPublished() {
         return published;
     }
@@ -35,10 +39,6 @@ public class HeardProject {
     public void setPublished(boolean published) {
         this.published = published;
     }
-
-    private List<Sound> sounds;
-    private List<Source> sources;
-    private List<Range> ranges;
 
     public HeardProject(){}
 

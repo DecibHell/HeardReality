@@ -55,6 +55,7 @@ import android.widget.Toast;
 
 import com.pchauvet.heardreality.DeviceListAdapter;
 import com.pchauvet.heardreality.ExtendedBluetoothDevice;
+import com.pchauvet.heardreality.MainActivity;
 import com.pchauvet.heardreality.R;
 
 import java.util.ArrayList;
@@ -142,9 +143,9 @@ public class ScannerFragment extends DialogFragment {
             stopScan();
             dismiss();
 
-            final ScannerFragmentListener listener = (ScannerFragmentListener) requireActivity();
+            final MainActivity mainActivity = (MainActivity) requireActivity();
             final ExtendedBluetoothDevice device = (ExtendedBluetoothDevice) mAdapter.getItem(position);
-            listener.onDeviceSelected(device.device, device.name != null ? device.name : getString(R.string.not_available));
+            mainActivity.onDeviceSelected(device.device, device.name != null ? device.name : getString(R.string.not_available));
         });
 
         final AlertDialog dialog = builder
@@ -157,8 +158,6 @@ public class ScannerFragment extends DialogFragment {
         mScanButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         mScanButton.setOnClickListener(v -> {
             if (mIsScanning) {
-                final ScannerFragmentListener listener = (ScannerFragmentListener) requireActivity();
-                listener.onNothingSelected();
                 dialog.cancel();
             } else {
                 startScan();
@@ -252,10 +251,4 @@ public class ScannerFragment extends DialogFragment {
             // should never be called
         }
     };
-
-    public interface ScannerFragmentListener {
-        void onDeviceSelected(final BluetoothDevice device, final String name);
-
-        void onNothingSelected();
-    }
 }
