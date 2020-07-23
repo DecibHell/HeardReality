@@ -9,6 +9,7 @@ import com.pchauvet.heardreality.objects.HeardProject;
 import com.pchauvet.heardreality.objects.Range;
 import com.pchauvet.heardreality.objects.Sound;
 import com.pchauvet.heardreality.objects.Source;
+import com.pchauvet.heardreality.objects.Trigger;
 import com.pchauvet.heardreality.objects.User;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class FirestoreManager {
         return FirebaseFirestore.getInstance();
     }
 
-    public static void gatherData(final Context context, final Runnable onCompleted){
+    public static void gatherData(final Runnable onCompleted){
         final AtomicBoolean oneTaskCompleted = new AtomicBoolean(false);
 
         db().collection("HeardProjects")
@@ -55,7 +56,7 @@ public class FirestoreManager {
                                         public void run(){
                                             // Check if all the projects have been gathered properly
                                             if(projectCompletionCounter.incrementAndGet() == totalProjects.get()){
-                                                notifyProjectsChanged(context);
+                                                notifyProjectsChanged();
                                                 // Check if the users have been gathered too, to send onCompleted
                                                 if(oneTaskCompleted.get()){
                                                     onCompleted.run();
@@ -240,8 +241,8 @@ public class FirestoreManager {
         void onProjectsChanged();
     }
 
-    public static void notifyProjectsChanged(Context context){
-        StorageManager.checkDownloaded(context);
+    public static void notifyProjectsChanged(){
+        StorageManager.checkDownloaded();
         for(DBChangeListener listener : dbChangeListeners){
             listener.onProjectsChanged();
         }

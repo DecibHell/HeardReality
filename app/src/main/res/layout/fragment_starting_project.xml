@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@android:drawable/checkbox_off_background" />
@@ -80,11 +80,10 @@
             android:id="@+id/spf_start_tick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="15dp"
+            android:layout_marginTop="15dp"
             android:layout_marginStart="10dp"
             app:layout_constraintTop_toBottomOf="@+id/spf_ht_tick"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/spf_sounds_tick"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@android:drawable/checkbox_off_background" />
 
@@ -99,6 +98,30 @@
             app:layout_constraintBottom_toBottomOf="@+id/spf_start_tick"
             app:layout_constraintStart_toEndOf="@+id/spf_start_tick"
             app:layout_constraintTop_toTopOf="@+id/spf_start_tick" />
+
+        <ImageView
+            android:id="@+id/spf_sounds_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginStart="10dp"
+            app:layout_constraintTop_toBottomOf="@+id/spf_start_tick"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@android:drawable/checkbox_off_background" />
+
+        <TextView
+            android:id="@+id/spf_sounds_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="@string/spf_no_sounds"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spf_sounds_tick"
+            app:layout_constraintStart_toEndOf="@+id/spf_sounds_tick"
+            app:layout_constraintTop_toTopOf="@+id/spf_sounds_tick" />
 
         <Button
             android:id="@+id/spf_go_button"

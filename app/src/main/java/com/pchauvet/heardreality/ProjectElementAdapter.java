@@ -69,7 +69,7 @@ public class ProjectElementAdapter  extends ArrayAdapter<HeardProject>{
 
         projectOwner = this.view.findViewById(R.id.ple_owner);
         User owner = FirestoreManager.getUser(project.getOwner());
-        projectOwner.setText(owner==null ? null : this.view.getResources().getString(R.string.wmf_by_owner, owner.getName()));
+        projectOwner.setText(this.view.getResources().getString(R.string.wmf_by_owner, owner.getName()));
 
         projectUnpublished = this.view.findViewById(R.id.ple_unpublished);
         projectUnpublished.setVisibility(project.isPublished() ? View.GONE : View.VISIBLE);

@@ -24,6 +24,24 @@ public class HeardProject {
     private List<Source> sources;
     private List<Range> ranges;
 
+    public Source getSourceById(String id){
+        for (Source s : getSources()){
+            if(s.getId().equals(id)){
+                return s;
+            }
+        }
+        return null;
+    }
+
+    public Range getRangeById(String id){
+        for (Range r : getRanges()){
+            if(r.getId().equals(id)){
+                return r;
+            }
+        }
+        return null;
+    }
+
     public String getDescription() {
         return description;
     }

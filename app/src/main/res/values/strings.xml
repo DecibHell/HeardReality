@@ -130,9 +130,17 @@
     <string name="spf_yes_ht">%s connected</string>
     <string name="spf_out_start">Reach the starting point</string>
     <string name="spf_in_start">Starting point reached</string>
+    <string name="spf_no_sounds">Wait for sounds to be loaded</string>
+    <string name="spf_yes_sounds">Sounds are loaded</string>
     <string name="spf_go">Start</string>
 
-
+    <!-- Playing Project Fragment -->
+    <string name="ppf_tab_text">Info</string>
+    <string name="ppf_tab_map">Map</string>
+    <string name="ppf_now_playing">Now Playing \"%s\" by %s</string>
+    <string name="ppf_description">Description</string>
+    <string name="ppf_instructions">Keep your phone in your pocket to enjoy the experience to its fullest.</string>
+    <string name="ppf_stop">Stop</string>
 
     <!-- IMPORTED FROM THINGY 52 -->
 

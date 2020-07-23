@@ -82,21 +82,6 @@ public class WorldMapFragment extends Fragment implements OnMapReadyCallback,
 
         mListLayout = view.findViewById(R.id.wmf_list);
 
-        mListTabs = view.findViewById(R.id.wmf_list_tabs);
-        mListTabs.setOnCheckedChangeListener((group, checkedId) -> {
-            switch (checkedId){
-                case R.id.wmf_list_downloaded :
-                    mListFilters[1] = "DOWNLOADED";
-                    break;
-                case R.id.wmf_list_my_projects :
-                    mListFilters[1] = "MYPROJECTS";
-                    break;
-                default :
-                    mListFilters[1] = "ALL";
-            }
-            projectsAdapter.getFilter().filter(formatFilter());
-        });
-
         mProjectsToggle = view.findViewById(R.id.wmf_projects_toggle);
         mProjectsToggle.setOnClickListener(v -> {
             if(mListLayout.getVisibility() == View.GONE){

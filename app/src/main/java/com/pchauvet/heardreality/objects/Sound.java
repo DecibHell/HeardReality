@@ -12,7 +12,7 @@ public class Sound {
     private Trigger offTrigger;  // optional
     private boolean loop;
     private String source; // reference to sources
-    private int volume;  // optional
+    private float volume;  // optional, 0(mute) to 1(max/unaltered)
 
     public Sound() {}
 
@@ -72,11 +72,11 @@ public class Sound {
         this.source = source;
     }
 
-    public int getVolume() {
+    public float getVolume() {
         return volume;
     }
 
-    public void setVolume(int volume) {
+    public void setVolume(float volume) {
         this.volume = volume;
     }
 }

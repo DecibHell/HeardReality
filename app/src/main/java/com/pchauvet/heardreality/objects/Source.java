@@ -11,7 +11,43 @@ public class Source {
     private GeoPoint position;
     private float altitude;
 
+    private Integer distanceModel; // optional , 0=logarithmic, 1=linear, 2=none
+    private Float distanceMin;
+    private Float distanceMax;
+
     public Source() {
+    }
+
+    public float getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(float altitude) {
+        this.altitude = altitude;
+    }
+
+    public void setDistanceModel(Integer distanceModel) {
+        this.distanceModel = distanceModel;
+    }
+
+    public void setDistanceMin(Float distanceMin) {
+        this.distanceMin = distanceMin;
+    }
+
+    public void setDistanceMax(Float distanceMax) {
+        this.distanceMax = distanceMax;
+    }
+
+    public Float getDistanceMax() {
+        return distanceMax;
+    }
+
+    public Integer getDistanceModel() {
+        return distanceModel;
+    }
+
+    public Float getDistanceMin() {
+        return distanceMin;
     }
 
     public String getName() {
@@ -36,13 +72,5 @@ public class Source {
 
     public void setPosition(GeoPoint position) {
         this.position = position;
-    }
-
-    public float getAltitude() {
-        return altitude;
-    }
-
-    public void setAltitude(float altitude) {
-        this.altitude = altitude;
     }
 }

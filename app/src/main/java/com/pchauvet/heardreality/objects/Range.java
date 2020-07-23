@@ -1,12 +1,14 @@
 package com.pchauvet.heardreality.objects;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.type.LatLng;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.android.SphericalUtil;
+import com.pchauvet.heardreality.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.NonNull;
 
 public class Range {
     @DocumentId
@@ -21,6 +23,14 @@ public class Range {
 
     // POLYGONAL RANGE
     private List<GeoPoint> points;
+
+    public boolean isLatLngInRange(LatLng latLng){
+        if (type.equals("CIRCULAR")){
+            return SphericalUtil.computeDistanceBetween(latLng, Utils.getLatLngFromGeoPoint(center)) <= radius;
+        } else {
+            return PolyUtil.containsLocation(latLng, Utils.getLatLngFromGeoPointList(points), true);
+        }
+    }
 
     public String getId() {
         return id;

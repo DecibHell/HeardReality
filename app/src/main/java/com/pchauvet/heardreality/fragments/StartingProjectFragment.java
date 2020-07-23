@@ -1,13 +1,11 @@
 package com.pchauvet.heardreality.fragments;
 
 import android.Manifest;
-import android.bluetooth.BluetoothDevice;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +18,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -32,13 +29,13 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.android.SphericalUtil;
+import com.pchauvet.heardreality.AudioProcess;
 import com.pchauvet.heardreality.MainActivity;
 import com.pchauvet.heardreality.R;
 import com.pchauvet.heardreality.Utils;
 import com.pchauvet.heardreality.dialogs.PermissionRationaleDialogFragment;
 import com.pchauvet.heardreality.objects.HeardProject;
 import com.pchauvet.heardreality.objects.Range;
-import com.pchauvet.heardreality.thingy.EmptyThingyListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +44,6 @@ import java.util.function.Function;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import no.nordicsemi.android.thingylib.ThingyListener;
-import no.nordicsemi.android.thingylib.ThingyListenerHelper;
 
 import static com.pchauvet.heardreality.Utils.REQUEST_ACCESS_FINE_LOCATION;
 import static com.pchauvet.heardreality.Utils.getLatLngFromGeoPoint;
@@ -68,9 +63,12 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
     private TextView mHtText;
     private ImageView mStartTick;
     private TextView mStartText;
+    private ImageView mSoundsTick;
+    private  TextView mSoundsText;
 
     private boolean htOk;
     private boolean startOk;
+    private boolean soundsOk;
 
     private Button mCancelButton;
     private Button mGoButton;
@@ -80,19 +78,15 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
     private FusedLocationProviderClient locationProvider;
     private LocationCallback locationCallback;
 
-    private Function<LatLng, Boolean> isLocationInRange;
+    private Range startingRange;
 
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
+    private Location lastLocation;
+
+    // The desired interval for location updates. Inexact. Updates may be more or less frequent.
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 3000;
 
-    /**
-     * The fastest rate for active location updates. Updates will never be more frequent
-     * than this value.
-     */
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    // The fastest rate for active location updates. Updates will never be more frequent than this value.
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     public StartingProjectFragment (HeardProject project){
         this.project = project;
@@ -114,6 +108,8 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
         mHtText = view.findViewById(R.id.spf_ht_text);
         mStartTick = view.findViewById(R.id.spf_start_tick);
         mStartText = view.findViewById(R.id.spf_start_text);
+        mSoundsTick = view.findViewById(R.id.spf_sounds_tick);
+        mSoundsText = view.findViewById(R.id.spf_sounds_text);
 
         // Check if there is a connected head-tracker at start
         String deviceName = ((MainActivity)requireActivity()).getDeviceName();
@@ -128,10 +124,13 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
         }
 
         mCancelButton = view.findViewById(R.id.spf_cancel_button);
-        mCancelButton.setOnClickListener(v -> ((MainActivity)requireActivity()).openWorldMapFragment());
+        mCancelButton.setOnClickListener(v -> {
+            AudioProcess.unloadAllSounds();
+            ((MainActivity) requireActivity()).openWorldMapFragment();
+        });
 
         mGoButton = view.findViewById(R.id.spf_go_button);
-        mGoButton.setOnClickListener(v -> ((MainActivity) requireActivity()).openPlayingProjectFragment(project));
+        mGoButton.setOnClickListener(v -> ((MainActivity) requireActivity()).openPlayingProjectFragment(project, lastLocation));
 
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.spf_map);
         if (mapFragment != null) {
@@ -140,6 +139,18 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
 
         // Register to listen to the device changes
         ((MainActivity)requireActivity()).listeners.add(this);
+
+        // Preload the sound files
+        AudioProcess.preloadProject(project, () -> {
+            if(getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    mSoundsText.setText(R.string.spf_yes_sounds);
+                    mSoundsTick.setImageResource(android.R.drawable.checkbox_on_background);
+                    soundsOk = true;
+                    updateGoButtonStatus();
+                });
+            }
+        });
     }
 
     @Override
@@ -175,7 +186,7 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
         final LatLngBounds.Builder focusBuilder = LatLngBounds.builder();
 
         // Print the Starting range
-        Range startingRange = getProjectStartingRange(project);
+        startingRange = getProjectStartingRange(project);
         if (startingRange.getType().equals("CIRCULAR")) {
             LatLng center = getLatLngFromGeoPoint(startingRange.getCenter());
             // Include the range's center in the camera focus
@@ -187,8 +198,6 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
                     .radius(radius);
             circleOptions.fillColor(Color.argb(100, 20, 100, 240));
             mMap.addCircle(circleOptions);
-            // Set the function to calculate if the user is in a circle
-            isLocationInRange = (LatLng location) -> SphericalUtil.computeDistanceBetween(location, center) <= radius;
         } else {
             PolygonOptions rectOptions = new PolygonOptions();
             List<LatLng> points = new ArrayList<>();
@@ -201,13 +210,12 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
             rectOptions.addAll(points);
             rectOptions.fillColor(Color.argb(100, 20, 100, 240));
             mMap.addPolygon(rectOptions);
-            // Set the function to calculate if the user is in a polygon
-            isLocationInRange = (LatLng location) -> PolyUtil.containsLocation(location, points, true);
         }
 
         // Check if the user is in the starting range at start
         locationProvider.getLastLocation()
                 .addOnSuccessListener(location -> {
+                    lastLocation = location;
                     LatLng latLng = Utils.getLatLngFromLocation(location);
                     // Set the camera zoom around the user and the starting range
                     focusBuilder.include(latLng);
@@ -220,12 +228,11 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                Log.e("","Oi");
                 if (locationResult == null) {
                     return;
                 }
                 for (Location location : locationResult.getLocations()) {
-                    Log.e("","hey");
+                    lastLocation = location;
                     LatLng latLng = Utils.getLatLngFromLocation(location);
                     checkLatLngInRange(latLng);
                 }
@@ -251,23 +258,23 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
 
     // Updates the UI to tell if the user is in range
     private void checkLatLngInRange(LatLng location){
-        if(isLocationInRange.apply(location)){
+        if(startingRange.isLatLngInRange(location)){
             // If the user is in the starting range
             mStartText.setText(R.string.spf_in_start);
             mStartTick.setImageResource(android.R.drawable.checkbox_on_background);
             startOk = true;
-            updateGoButtonStatus(htOk);
         } else {
             mStartText.setText(R.string.spf_out_start);
             mStartTick.setImageResource(android.R.drawable.checkbox_off_background);
             startOk = false;
-            updateGoButtonStatus(false);
         }
+        updateGoButtonStatus();
     }
 
-    private void updateGoButtonStatus(boolean enabled){
-        mGoButton.setClickable(enabled);
-        if(enabled){
+    private void updateGoButtonStatus(){
+        boolean enable = htOk && startOk && soundsOk;
+        mGoButton.setClickable(enable);
+        if(enable){
             mGoButton.setTextColor(getResources().getColor(R.color.colorPrimary, null));
         } else {
             mGoButton.setTextColor(getResources().getColor(R.color.grey, null));
@@ -280,7 +287,7 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
             mHtText.setText(getString(R.string.spf_yes_ht, deviceName));
             mHtTick.setImageResource(android.R.drawable.checkbox_on_background);
             htOk = true;
-            updateGoButtonStatus(startOk);
+            updateGoButtonStatus();
         }
     }
 
@@ -290,7 +297,7 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
             mHtText.setText(R.string.spf_no_ht);
             mHtTick.setImageResource(android.R.drawable.checkbox_off_background);
             htOk = false;
-            updateGoButtonStatus(false);
+            updateGoButtonStatus();
         }
     }
 }

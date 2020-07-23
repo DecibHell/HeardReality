@@ -166,20 +166,6 @@ public class ThingyService extends BaseThingyService {
         super.onDestroy();
     }
 
-    /* TODO : TO DISCONNECT
-    final BluetoothDevice device = intent.getExtras().getParcelable(Utils.EXTRA_DEVICE);
-                    if (device != null) {
-        final ThingyConnection thingyConnection = mThingyConnections.get(device);
-        if (thingyConnection != null) {
-            thingyConnection.disconnect();
-            if (mDevices.contains(device)) {
-                mDevices.remove(device);
-            }
-        }
-    }
-    */
-
-
     @Override
     public void onTaskRemoved(final Intent rootIntent) {
         super.onTaskRemoved(rootIntent);

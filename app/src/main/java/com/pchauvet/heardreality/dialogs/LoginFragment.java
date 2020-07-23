@@ -67,7 +67,7 @@ public class LoginFragment  extends DialogFragment {
             mWaitingScreen = new WaitingScreen();
             mWaitingScreen.show(getParentFragmentManager(), null);
             AuthManager.signIn(email, password, () -> {
-                FirestoreManager.gatherData(requireContext(), onGatherDataCompleted());
+                FirestoreManager.gatherData(onGatherDataCompleted());
             },() -> {
                 mWaitingScreen.dismiss();
                 mErrorText.setText(R.string.login_error);
@@ -81,7 +81,7 @@ public class LoginFragment  extends DialogFragment {
         mGuestButton.setOnClickListener(v -> {
             mWaitingScreen = new WaitingScreen();
             mWaitingScreen.show(getParentFragmentManager(), null);
-            FirestoreManager.gatherData(requireContext(), onGatherDataCompleted());
+            FirestoreManager.gatherData(onGatherDataCompleted());
         });
 
         this.setCancelable(false);

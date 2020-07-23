@@ -23,7 +23,12 @@ public class StorageManager {
 
     public static StorageReference storageRoot() {return storage().getReference().child("HeardProjects");}
 
-    public static void downloadProject(Context context, final String projectId, final Runnable onSuccess, final Runnable onFailure, WaitingScreen ws){
+    private static File filesDir;
+    public static void init(Context context){
+        filesDir = context.getFilesDir();
+    }
+
+    public static void downloadProject(final String projectId, final Runnable onSuccess, final Runnable onFailure, WaitingScreen ws){
         final HeardProject project = FirestoreManager.getProject(projectId);
         if(project.getSounds() != null && !project.getSounds().isEmpty()) {
             String ownerId = project.getOwner();
@@ -37,7 +42,7 @@ public class StorageManager {
             for (Sound sound : project.getSounds()) {
                 String sourceFile = sound.getSourceFile();
                 // Create a new file in the app's folder
-                File newFile = getSoundFile(context, ownerId, projectId, sourceFile);
+                File newFile = getSoundFile(ownerId, projectId, sourceFile);
                 newFile.getParentFile().mkdirs();
                 // Download the file from the Cloud Storage
                 storageRoot().child(project_path).child(sourceFile)
@@ -47,7 +52,7 @@ public class StorageManager {
                                 if (gotNoFailure.get()) {
                                     Log.v("", "Successfully downloaded all the sounds");
                                     downloadedProjects.add(projectId);
-                                    notifyDownloadsChanged(context);
+                                    notifyDownloadsChanged();
                                     ws.dismiss();
                                     onSuccess.run();
                                 } else {
@@ -71,13 +76,13 @@ public class StorageManager {
     }
 
     // Check which projects are downloaded by checking if all their sounds' source files are present on disk
-    public static void checkDownloaded(Context context){
+    public static void checkDownloaded(){
         downloadedProjects.clear();
         for (HeardProject project : FirestoreManager.projects){
             if(project.getSounds() != null && !project.getSounds().isEmpty()){
                 boolean isDownloaded = true;
                 for (Sound sound : project.getSounds()){
-                    File sourceFile = getSoundFile(context, project.getOwner(), project.getId(), sound.getSourceFile());
+                    File sourceFile = getSoundFile(project.getOwner(), project.getId(), sound.getSourceFile());
                     isDownloaded = isDownloaded && sourceFile.exists();
                 }
                 if(isDownloaded){
@@ -89,22 +94,22 @@ public class StorageManager {
         }
     }
 
-    public static File getSoundFile (Context context, String ownerId, String projectId, String sourceFile){
-        return new File(context.getFilesDir(), ownerId+"/"+projectId+"/"+sourceFile);
+    public static File getSoundFile (String ownerId, String projectId, String sourceFile){
+        return new File(filesDir, ownerId+"/"+projectId+"/"+sourceFile);
     }
 
-    public static boolean deleteProject (Context context, final String projectId){
+    public static boolean deleteProject (final String projectId){
         final HeardProject project = FirestoreManager.getProject(projectId);
         if(project.getSounds() != null && !project.getSounds().isEmpty()) {
             String ownerId = project.getOwner();
             for (Sound sound : project.getSounds()) {
                 String sourceFile = sound.getSourceFile();
-                File soundFile = getSoundFile(context, ownerId, projectId, sourceFile);
+                File soundFile = getSoundFile(ownerId, projectId, sourceFile);
                 soundFile.delete();
             }
-            new File(context.getFilesDir(), ownerId+"/"+projectId).delete();
+            new File(filesDir, ownerId+"/"+projectId).delete();
             downloadedProjects.remove(projectId);
-            notifyDownloadsChanged(context);
+            notifyDownloadsChanged();
             return true;
         } else {
             Log.v("", "No sounds to delete");
@@ -117,8 +122,8 @@ public class StorageManager {
         void onDownloadsChanged();
     }
 
-    public static void notifyDownloadsChanged(Context context){
-        StorageManager.checkDownloaded(context);
+    public static void notifyDownloadsChanged(){
+        StorageManager.checkDownloaded();
         for(StorageManager.StorageChangeListener listener : storageChangeListeners){
             listener.onDownloadsChanged();
         }

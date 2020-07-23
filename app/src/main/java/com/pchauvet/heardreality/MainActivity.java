@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.button.MaterialButton;
 import com.pchauvet.heardreality.MathUtils.Quaternion;
 import com.pchauvet.heardreality.database.DatabaseHelper;
@@ -211,8 +213,11 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
 
         mFragmentManager = getSupportFragmentManager();
 
-        // LOAD AUDIO ENGINE
-        mAudioProcess = new AudioProcess(this);
+        // INIT STORAGE MANAGER
+        StorageManager.init(this);
+
+        // INIT AUDIO ENGINE
+        AudioProcess.initAudioEngine(this);
 
         // OPEN THE WORLD MAP FRAGMENT AT START
         openWorldMapFragment();
@@ -566,9 +571,9 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         fragmentTransaction.commit();
     }
 
-    public void openPlayingProjectFragment(HeardProject project){
+    public void openPlayingProjectFragment(HeardProject project, Location ref){
         fragmentTransaction = mFragmentManager.beginTransaction();
-        PlayingProjectFragment playingProjectFragment = new PlayingProjectFragment(project);
+        PlayingProjectFragment playingProjectFragment = new PlayingProjectFragment(project, ref);
         fragmentTransaction.replace(R.id.fragment_container, playingProjectFragment);
         fragmentTransaction.commit();
     }

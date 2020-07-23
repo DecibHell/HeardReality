@@ -118,7 +118,7 @@ public class SignupFragment extends DialogFragment {
 
     private Runnable onPersistUserSuccess() {
         // ON A SUCCESSFUL CREATION OF THE USER DOCUMENT IN DATABASE
-        return () -> FirestoreManager.gatherData(requireContext(), onGatherDataCompleted());
+        return () -> FirestoreManager.gatherData(onGatherDataCompleted());
     }
 
     private Runnable onGatherDataCompleted() {

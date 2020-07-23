@@ -1,9 +1,9 @@
 package com.pchauvet.heardreality.objects;
 
 public class Trigger {
-    private int delay; // optional
+    private int delay; // optional, in ms
     private boolean onlyOnce;
-    private String type; // END_OF_SOUND ,
+    private String type; // RANGE , (END_OF_SOUND) , TIME_AFTER_START , (TIME_ABSOLUTE)    / types in parentheses are not implemented yet
     private Object trigger;
 
     public Trigger() {

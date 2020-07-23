@@ -62,11 +62,7 @@ public class ProjectDetailsFragment  extends Fragment {
 
         ownerText = view.findViewById(R.id.pdf_owner);
         User owner = FirestoreManager.getUser(project.getOwner());
-        if(owner != null){
-            ownerText.setText(getResources().getString(R.string.pdf_owner, owner.getName()));
-        } else {
-            ownerText.setVisibility(View.GONE);
-        }
+        ownerText.setText(getResources().getString(R.string.pdf_owner, owner.getName()));
 
         locationText = view.findViewById(R.id.pdf_location);
         LatLng startingPoint = Utils.getProjectStartingPoint(project);
@@ -111,7 +107,7 @@ public class ProjectDetailsFragment  extends Fragment {
             final WaitingScreen mWaitingScreen = new WaitingScreen();
             mWaitingScreen.show(getParentFragmentManager(), null);
             // Try to download the project
-            StorageManager.downloadProject(requireContext(), project.getId(), this::updateInterface, () -> Log.e("", "Error while downloading the project"), mWaitingScreen);
+            StorageManager.downloadProject(project.getId(), this::updateInterface, () -> Log.e("", "Error while downloading the project"), mWaitingScreen);
         });
 
         startButton = view.findViewById(R.id.pdf_start);
@@ -123,7 +119,7 @@ public class ProjectDetailsFragment  extends Fragment {
 
         deleteButton = view.findViewById(R.id.pdf_delete);
         deleteButton.setOnClickListener(v -> {
-            if(StorageManager.deleteProject(requireContext(), project.getId())){
+            if(StorageManager.deleteProject(project.getId())){
                 updateInterface();
             }
         });

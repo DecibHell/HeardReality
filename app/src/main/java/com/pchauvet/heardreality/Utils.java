@@ -47,12 +47,15 @@ import android.location.Geocoder;
 import android.location.Location;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.GeoPoint;
 import com.pchauvet.heardreality.objects.HeardProject;
 import com.pchauvet.heardreality.objects.Range;
+import com.pchauvet.heardreality.objects.Sound;
+import com.pchauvet.heardreality.objects.Source;
 import com.pchauvet.heardreality.thingy.Thingy;
 
 public class Utils {
@@ -121,6 +124,22 @@ public class Utils {
     public static LatLng getLatLngFromGeoPoint(GeoPoint geoPoint){ return new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude()); }
 
     public static LatLng getLatLngFromLocation(Location location){ return new LatLng(location.getLatitude(), location.getLongitude()); }
+
+    public static Location getLocationFromGeoPoint(GeoPoint geoPoint){
+        Location location = new Location("");
+        location.setLatitude(geoPoint.getLatitude());
+        location.setLongitude(geoPoint.getLongitude());
+        return location;
+
+    }
+
+    public static List<LatLng> getLatLngFromGeoPointList(List<GeoPoint> geoPoints){
+        List<LatLng> latLngPoints = new ArrayList<>();
+        for (GeoPoint point : geoPoints){
+            latLngPoints.add(getLatLngFromGeoPoint(point));
+        }
+        return latLngPoints;
+    }
 
     public static LatLng getProjectStartingPoint(HeardProject project){
         Range range = getProjectStartingRange(project);
