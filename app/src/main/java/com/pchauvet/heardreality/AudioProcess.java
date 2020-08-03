@@ -37,26 +37,34 @@ public class AudioProcess {
                 File file = StorageManager.getSoundFile(project.getOwner(), project.getId(), sound.getSourceFile());
                 final String path = file.getAbsolutePath();
                 Thread preloadThread = new Thread(() -> {
-                        mAudioEngine.preloadSoundFile(path);
-                        if(Thread.currentThread().isInterrupted()) {
+
+                    // Try to preload the file twice, then crash if none succeeded
+                    if (!mAudioEngine.preloadSoundFile(path)){
+                        if (!mAudioEngine.preloadSoundFile(path)){
+                            Log.e("", "Error preloading the file");
                             return;
                         }
-                        // Create the 'sourceId' sound object and saves it in the Map
-                        int sourceId;
-                        if (sound.getSource() == null){
-                            sourceId = mAudioEngine.createStereoSound(path);
-                        } else {
-                            sourceId = mAudioEngine.createSoundObject(path);
-                        }
+                    }
 
-                        mLoadedSounds.put(file, sourceId);
+                    if(Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    // Create the 'sourceId' sound object and saves it in the Map
+                    int sourceId;
+                    if (sound.getSource() == null){
+                        sourceId = mAudioEngine.createStereoSound(path);
+                    } else {
+                        sourceId = mAudioEngine.createSoundObject(path);
+                    }
+                    mLoadedSounds.put(file, sourceId);
+                    Log.e(sound.getName(), sourceId+"");
 
-                        // Check if we have preloaded all the sounds
+                    // Check if we have preloaded all the sounds
                     ongoingLoadings.remove(Thread.currentThread());
-                        if (ongoingLoadings.isEmpty()) {
-                            Log.v("", "Preloaded all sounds");
-                            onFinish.run();
-                        }
+                    if (ongoingLoadings.isEmpty()) {
+                        Log.v("", "Preloaded all sounds");
+                        onFinish.run();
+                    }
                 });
                 ongoingLoadings.add(preloadThread);
                 preloadThread.start();
@@ -74,19 +82,14 @@ public class AudioProcess {
 
     public static void unloadAllSounds(){
         // Stop the ongoing preloading threads
-        for(Thread thread : ongoingLoadings){
-            thread.interrupt();
+        for(Object thread : ongoingLoadings.toArray()){
+            ((Thread)thread).interrupt();
         }
         ongoingLoadings.clear();
         // Unload the sound files
-        for (File file : mLoadedSounds.keySet()) {
-            new Thread(() -> {
-                Integer id = mLoadedSounds.remove(file);
-                if(id != null){
-                    mAudioEngine.stopSound(id);
-                }
-                mAudioEngine.unloadSoundFile(file.getAbsolutePath());
-            }).start();
+        for (Object file : mLoadedSounds.keySet().toArray()) {
+            mLoadedSounds.remove((File)file);
+            mAudioEngine.unloadSoundFile(((File)file).getAbsolutePath());
         }
     }
 
@@ -135,10 +138,8 @@ public class AudioProcess {
         Log.v("", "Stopping all sounds");
         for (Integer id : mLoadedSounds.values()) {
             if (id != null && mAudioEngine.isSourceIdValid(id)) {
-                new Thread(() -> {
-                    // Stop the audio playback
-                    mAudioEngine.stopSound(id);
-                }).start();
+                // Stop the audio playback
+                mAudioEngine.stopSound(id);
             }
         }
     }

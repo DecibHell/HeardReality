@@ -44,8 +44,11 @@ public class StorageManager {
                 // Create a new file in the app's folder
                 File newFile = getSoundFile(ownerId, projectId, sourceFile);
                 newFile.getParentFile().mkdirs();
+                Log.v("Downloading : ", newFile.getPath());
                 // Download the file from the Cloud Storage
-                storageRoot().child(project_path).child(sourceFile)
+                storageRoot()
+                        .child(project_path)
+                        .child(sourceFile)
                         .getFile(newFile)
                         .addOnSuccessListener(taskSnapshot -> {
                             if (processedSounds.incrementAndGet() == totalSounds) {

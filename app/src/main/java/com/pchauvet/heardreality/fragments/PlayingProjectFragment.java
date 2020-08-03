@@ -90,14 +90,14 @@ public class PlayingProjectFragment extends Fragment {
                     coordinates = getCoordinates(Utils.getLocationFromGeoPoint(source.getPosition()), source.getAltitude());
                 }
                 Thread thread = new Thread(new OnTriggerRunnable(onTrigger.getDelay(), project, sound, coordinates, runningThreads));
-                thread.start();
                 runningThreads.put(sound, thread);
+                thread.start();
             }
 
             if (offTrigger != null && offTrigger.getType().equals("TIME_AFTER_START")) {
                 Thread thread = new Thread(new OffTriggerRunnable(offTrigger.getDelay(), project, sound, runningThreads, killingThreads));
+                killingThreads.put(sound, thread);
                 thread.start();
-                runningThreads.put(sound, thread);
             }
         }
     }
@@ -105,13 +105,13 @@ public class PlayingProjectFragment extends Fragment {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        for (Object thread : runningThreads.values().toArray()){
+            ((Thread)thread).interrupt();
+        }
+        for (Object thread : killingThreads.values().toArray()){
+            ((Thread)thread).interrupt();
+        }
         AudioProcess.stopAllSounds();
-        for (Thread thread : runningThreads.values()){
-            thread.interrupt();
-        }
-        for (Thread thread : killingThreads.values()){
-            thread.interrupt();
-        }
         AudioProcess.unloadAllSounds();
     }
 
@@ -139,8 +139,8 @@ public class PlayingProjectFragment extends Fragment {
                     }
                     // Create the Thread
                     Thread thread = new Thread(new OnTriggerRunnable(onTrigger.getDelay(), project, sound, coordinates, runningThreads));
-                    thread.start();
                     runningThreads.put(sound, thread);
+                    thread.start();
                 }
             }
             // Check that there is an offTrigger, that it's a RANGE trigger, that the sound is running or waiting, and that the killer isn't already running
@@ -149,8 +149,8 @@ public class PlayingProjectFragment extends Fragment {
                 // Detect user in range
                 if (range != null && range.isLatLngInRange(Utils.getLatLngFromLocation(newLocation))) {
                     Thread thread = new Thread(new OffTriggerRunnable(offTrigger.getDelay(), project, sound, runningThreads, killingThreads));
-                    thread.start();
                     killingThreads.put(sound, thread);
+                    thread.start();
                 }
             }
         }

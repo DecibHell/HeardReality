@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,13 +31,10 @@ import java.util.List;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.material.button.MaterialButton;
 import com.pchauvet.heardreality.MathUtils.Quaternion;
 import com.pchauvet.heardreality.database.DatabaseHelper;
 import com.pchauvet.heardreality.dialogs.HTConfigFragment;
 import com.pchauvet.heardreality.dialogs.LoginFragment;
-import com.pchauvet.heardreality.dialogs.PermissionRationaleDialogFragment;
 import com.pchauvet.heardreality.dialogs.ScannerFragment;
 import com.pchauvet.heardreality.dialogs.UserProfileFragment;
 import com.pchauvet.heardreality.fragments.PlayingProjectFragment;
@@ -66,10 +64,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
 
     private Toolbar mActivityToolbar;
 
-    private FragmentManager mFragmentManager;
-
-    private FragmentTransaction fragmentTransaction;
-
     private ArrayList<BluetoothDevice> mConnectedBleDeviceList;
 
     private BluetoothDevice mDevice;
@@ -81,26 +75,22 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
 
     private ThingyService.ThingyBinder mBinder;
 
-    private ScannerFragment mScannerFragment;
-    private HTConfigFragment mConfigFragment;
-
     private TextView mBatteryLevel;
     private ImageView mBatteryLevelImg;
-
     private TextView mHTStatus;
-
-    private MaterialButton mHTButton;
+    private Button mHTButton;
 
     private DatabaseHelper mDatabaseHelper;
 
     private Quaternion quaternionReading = new Quaternion();
     private Quaternion quaternionCalibrated;
-    private Quaternion quaternionRef;
+    private Quaternion quaternionRefConjugate;
 
-    private AudioProcess mAudioProcess;
-
+    private FragmentManager mFragmentManager;
+    private FragmentTransaction fragmentTransaction;
+    private ScannerFragment mScannerFragment;
+    private HTConfigFragment mConfigFragment;
     private LoginFragment mLoginFragment;
-
     private UserProfileFragment mUserProfileFragment;
 
     private ThingyListener mThingyListener = new EmptyThingyListener() {
@@ -153,13 +143,13 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
             // Log.v(ThingyUtils.TAG, "/ w :" + w + "/ x :" + x + "/ y :" + y + "/ z :" + z);
             quaternionReading.set(w,x,y,z);
 
-            if(quaternionRef != null){
-                quaternionCalibrated = quaternionReading.decode(quaternionRef);
+            if(quaternionRefConjugate != null){
+                quaternionCalibrated = quaternionReading.decode(quaternionRefConjugate);
             }else{
                 quaternionCalibrated = quaternionReading;
             }
 
-            mAudioProcess.rotateHead(quaternionCalibrated.getConjugate());
+            AudioProcess.rotateHead(quaternionCalibrated.getConjugate());
 
             if(mConfigFragment.isAdded()) {
                 mConfigFragment.onOrientationChanged(quaternionCalibrated.toEulerAngles());
@@ -193,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         mConfigFragment = new HTConfigFragment();
 
         mHTButton = findViewById(R.id.ht_config_button);
-
         mHTButton.setOnClickListener(v -> onClickConnect());
 
         // Make sure that the window pans to adjust to screen changes (like opening the keyboard)
@@ -555,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements ThingySdkManager.
         }
     }
 
-    public void onCalibration() { quaternionRef = quaternionReading.copy(); }
+    public void onCalibration() { quaternionRefConjugate = quaternionReading.getConjugate(); }
 
     public void openWorldMapFragment(){
         fragmentTransaction = mFragmentManager.beginTransaction();

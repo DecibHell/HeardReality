@@ -27,11 +27,13 @@ public class OffTriggerRunnable implements Runnable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        AudioProcess.stopSound(project, sound);
-        Thread runningThread = runningThreads.remove(sound);
-        if(runningThread != null){
-            runningThread.interrupt();
+        if(!Thread.interrupted()) {
+            AudioProcess.stopSound(project, sound);
+            Thread runningThread = runningThreads.remove(sound);
+            if (runningThread != null) {
+                runningThread.interrupt();
+            }
+            killingThreads.remove(sound);
         }
-        killingThreads.remove(sound);
     }
 }

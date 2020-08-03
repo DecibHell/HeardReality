@@ -124,7 +124,7 @@ public class PlayingProjectMapFragment extends Fragment implements OnMapReadyCal
                 CircleOptions circleOptions = new CircleOptions()
                     .center(center)
                     .radius(radius)
-                    .fillColor(Color.argb(100, 10, 50, 200))
+                    .fillColor(Color.argb(70, 10, 50, 200))
                     .strokeColor(0);
                 mMap.addCircle(circleOptions);
             } else {
@@ -137,7 +137,7 @@ public class PlayingProjectMapFragment extends Fragment implements OnMapReadyCal
                     focusBuilder.include(point);
                 }
                 rectOptions.addAll(points);
-                rectOptions.fillColor(Color.argb(100, 10, 50, 200));
+                rectOptions.fillColor(Color.argb(70, 10, 50, 200));
                 rectOptions.strokeColor(0);
                 mMap.addPolygon(rectOptions);
             }

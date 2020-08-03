@@ -70,9 +70,9 @@ public class Quaternion{
         return new Quaternion(w, x, y, z);
     }
 
-    // Decode a quaternion by rotating it backwards by the reference (ref- * this * ref)
-    public Quaternion decode(final Quaternion ref){
-        return (ref.getConjugate().multiply(this));
+    // Decode a quaternion by rotating it backwards by the reference (this * ref-)
+    public Quaternion decode(final Quaternion refConjug){
+        return (this.multiply(refConjug));
     }
 
     public String toString(){

@@ -29,7 +29,9 @@ public class OnTriggerRunnable implements Runnable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        AudioProcess.playSound(project, sound, coordinates[0], coordinates[1], coordinates[2]);
-        runningThreads.remove(sound);
+        if(!Thread.interrupted()) {
+            AudioProcess.playSound(project, sound, coordinates[0], coordinates[1], coordinates[2]);
+            runningThreads.remove(sound);
+        }
     }
 }
