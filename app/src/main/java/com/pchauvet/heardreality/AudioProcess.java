@@ -21,23 +21,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AudioProcess {
     private static GvrAudioEngine mAudioEngine;
 
-    private static GvrAudioSurround mSurroundEngine;
-
     private static Map<File, Integer> mLoadedSounds = new HashMap<>();  // Maps file names to IDs in the audio engine
 
     public static void initAudioEngine(Context context){
         mAudioEngine = new GvrAudioEngine(context, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
     }
 
-    private static List<Thread> ongoingLoadings = new ArrayList<>();
+    private static Thread preloadThread = new Thread();
 
     public static void preloadProject(final HeardProject project, Runnable onFinish){
         if(project.getSounds() != null && !project.getSounds().isEmpty()) {
-            for (Sound sound : project.getSounds()) {
-                File file = StorageManager.getSoundFile(project.getOwner(), project.getId(), sound.getSourceFile());
-                final String path = file.getAbsolutePath();
-                Thread preloadThread = new Thread(() -> {
+            preloadThread = new Thread(() -> {
+                for (Sound sound : project.getSounds()) {
+                    if(Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
 
+                    File file = StorageManager.getSoundFile(project.getOwner(), project.getId(), sound.getSourceFile());
+                    final String path = file.getAbsolutePath();
                     // Try to preload the file twice, then crash if none succeeded
                     if (!mAudioEngine.preloadSoundFile(path)){
                         if (!mAudioEngine.preloadSoundFile(path)){
@@ -49,6 +50,7 @@ public class AudioProcess {
                     if(Thread.currentThread().isInterrupted()) {
                         return;
                     }
+
                     // Create the 'sourceId' sound object and saves it in the Map
                     int sourceId;
                     if (sound.getSource() == null){
@@ -57,18 +59,11 @@ public class AudioProcess {
                         sourceId = mAudioEngine.createSoundObject(path);
                     }
                     mLoadedSounds.put(file, sourceId);
-                    Log.e(sound.getName(), sourceId+"");
-
-                    // Check if we have preloaded all the sounds
-                    ongoingLoadings.remove(Thread.currentThread());
-                    if (ongoingLoadings.isEmpty()) {
-                        Log.v("", "Preloaded all sounds");
-                        onFinish.run();
-                    }
-                });
-                ongoingLoadings.add(preloadThread);
-                preloadThread.start();
-            }
+                }
+                Log.v("", "Preloaded all sounds");
+                onFinish.run();
+            });
+            preloadThread.start();
         } else {
             onFinish.run();
         }
@@ -76,20 +71,21 @@ public class AudioProcess {
 
     public static void unloadSound(HeardProject project, Sound sound){
         File file = StorageManager.getSoundFile(project.getOwner(), project.getId(), sound.getSourceFile());
-        mLoadedSounds.remove(file);
+        Integer id = mLoadedSounds.remove(file);
         mAudioEngine.unloadSoundFile(file.getAbsolutePath());
     }
 
     public static void unloadAllSounds(){
-        // Stop the ongoing preloading threads
-        for(Object thread : ongoingLoadings.toArray()){
-            ((Thread)thread).interrupt();
-        }
-        ongoingLoadings.clear();
+        // Stop the preloading thread
+        preloadThread.interrupt();
         // Unload the sound files
-        for (Object file : mLoadedSounds.keySet().toArray()) {
-            mLoadedSounds.remove((File)file);
-            mAudioEngine.unloadSoundFile(((File)file).getAbsolutePath());
+        for (Object obj : mLoadedSounds.keySet().toArray()) {
+            File file = (File) obj;
+            Integer id = mLoadedSounds.remove(file);
+            Log.e(id+"", file.getAbsolutePath());
+            // Why doesn't this erase the files from memory?!?!
+            mAudioEngine.stopSound(id);
+            mAudioEngine.unloadSoundFile(file.getAbsolutePath());
         }
     }
 

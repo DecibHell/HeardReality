@@ -11,7 +11,7 @@ public class Source {
     private GeoPoint position;
     private float altitude;
 
-    private Integer distanceModel; // optional , 0=logarithmic, 1=linear, 2=none
+    private Integer distanceModel; // optional , 0=logarithmic, 1=linear, 2=none    // if specified, specify also distanceMin and distanceMax
     private Float distanceMin;
     private Float distanceMax;
 
