@@ -112,7 +112,7 @@ public class PlayingProjectFragment extends Fragment {
             ((Thread)thread).interrupt();
         }
         AudioProcess.stopAllSounds();
-        AudioProcess.unloadAllSounds();
+        AudioProcess.unloadAllSounds(requireContext());
     }
 
     public void onUserMoved(Location newLocation){

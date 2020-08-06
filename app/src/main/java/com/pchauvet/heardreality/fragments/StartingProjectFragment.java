@@ -125,7 +125,7 @@ public class StartingProjectFragment extends Fragment implements OnMapReadyCallb
 
         mCancelButton = view.findViewById(R.id.spf_cancel_button);
         mCancelButton.setOnClickListener(v -> {
-            AudioProcess.unloadAllSounds();
+            AudioProcess.unloadAllSounds(requireContext());
             ((MainActivity) requireActivity()).openWorldMapFragment();
         });
 

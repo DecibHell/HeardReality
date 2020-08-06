@@ -113,7 +113,8 @@ public class PlayingProjectMapFragment extends Fragment implements OnMapReadyCal
         }
 
         final LatLngBounds.Builder focusBuilder = LatLngBounds.builder();
-        // Print the Starting range
+
+        // Draw all ranges
         for (Range range : project.getRanges()){
             if (range.getType().equals("CIRCULAR")) {
                 LatLng center = getLatLngFromGeoPoint(range.getCenter());
@@ -143,27 +144,13 @@ public class PlayingProjectMapFragment extends Fragment implements OnMapReadyCal
             }
         }
 
+        // Draw all sound sources
         for (Source source : project.getSources()) {
             LatLng center = Utils.getLatLngFromGeoPoint(source.getPosition());
             // Draw the source's icon
             mMap.addGroundOverlay(new GroundOverlayOptions()
                     .position(center, 10)
                     .image(BitmapDescriptorFactory.fromResource(android.R.drawable.ic_lock_silent_mode_off)));
-
-            // Draw the source's distance rolloff zone if any
-            if (source.getDistanceModel() != null) {
-                double radius = source.getDistanceMin();
-                CircleOptions circleOptions = new CircleOptions()
-                        .center(center)
-                        .radius(radius)
-                        .fillColor(Color.argb(100, 200, 10, 10))
-                        .strokeColor(0);
-                mMap.addCircle(circleOptions);
-
-                radius = source.getDistanceMax();
-                circleOptions.radius(radius);
-                mMap.addCircle(circleOptions);
-            }
         }
 
         // Move the camera to show the whole project

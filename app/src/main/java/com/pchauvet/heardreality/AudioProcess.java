@@ -11,6 +11,7 @@ import com.pchauvet.heardreality.objects.Sound;
 import com.pchauvet.heardreality.objects.Source;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,18 +76,12 @@ public class AudioProcess {
         mAudioEngine.unloadSoundFile(file.getAbsolutePath());
     }
 
-    public static void unloadAllSounds(){
+    public static void unloadAllSounds(Context context){
         // Stop the preloading thread
         preloadThread.interrupt();
-        // Unload the sound files
-        for (Object obj : mLoadedSounds.keySet().toArray()) {
-            File file = (File) obj;
-            Integer id = mLoadedSounds.remove(file);
-            Log.e(id+"", file.getAbsolutePath());
-            // Why doesn't this erase the files from memory?!?!
-            mAudioEngine.stopSound(id);
-            mAudioEngine.unloadSoundFile(file.getAbsolutePath());
-        }
+
+        mAudioEngine = new GvrAudioEngine(context, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY);
+        mLoadedSounds.clear();
     }
 
     // X = EAST, Y = NORTH, Z = UP
