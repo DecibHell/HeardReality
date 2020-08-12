@@ -11,5 +11,6 @@ Demonstration Video : "https://www.youtube.com/watch?v=EvFLKGN2q5c&feature=youtu
 Two files are missing to compile the project because they contain private credentials :
 - google-services.json
 - src/debug/res/values/google_maps_api.xml
+
 If you want to compile the project, you will need to create your own version of the Firebase Database and get a Google API key for Firebase and Google Maps.
 You can contact me at pierrick.chauvet@gmail.com for details.
