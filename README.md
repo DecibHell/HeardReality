@@ -2,7 +2,7 @@ This application lets you play soundwalks in 3D audio with a head-tracker.
 It's only a prototype, coded as support for a thesis about "Locative and Spatial Audio" (Pierrick Chauvet 2020, MMT, Trinity College Dublin).
 
 It uses :
-- A Nordic Thiny:52 head-tracker
+- A Nordic Thingy:52 head-tracker
 - Google Resonance Audio
 - Google Services (Maps, Firebase)
 
