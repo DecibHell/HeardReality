@@ -6,7 +6,7 @@ It uses :
 - Google Resonance Audio
 - Google Services (Maps, Firebase)
 
-Demonstration Video : "https://www.youtube.com/watch?v=EvFLKGN2q5c&feature=youtu.be"
+Demonstration Video : "https://www.youtube.com/watch?v=0C5w8lod2Ss"
 
 Two files are missing to compile the project because they contain private credentials :
 - google-services.json
