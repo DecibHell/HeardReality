@@ -8,9 +8,13 @@ It uses :
 
 Demonstration Video : "https://www.youtube.com/watch?v=0C5w8lod2Ss"
 
+TRY THE PROJECT :
+You can try the project by installing the app on your phone with "heard_reality.apk". However, there is no way at the moment for users to create soundwalks. If you want to try the project with a soundwalk and you already have a Thingy:52, contact me at pierrick.chauvet@gmail.com .
+
+
+COMPILE THE PROJECT :
 Two files are missing to compile the project because they contain private credentials :
 - google-services.json
 - src/debug/res/values/google_maps_api.xml
 
 If you want to compile the project, you will need to create your own version of the Firebase Database and get a Google API key for Firebase and Google Maps.
-You can contact me at pierrick.chauvet@gmail.com for details.
