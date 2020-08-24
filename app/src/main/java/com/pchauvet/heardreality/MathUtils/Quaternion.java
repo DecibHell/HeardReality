@@ -1,11 +1,14 @@
 package com.pchauvet.heardreality.MathUtils;
 
+import androidx.annotation.NonNull;
+
 public class Quaternion{
     public float w;
     public float x;
     public float y;
     public float z;
 
+    // Parameterized constructor
     public Quaternion(float w, float x, float y, float z){
         this.w = w;
         this.x = x;
@@ -13,6 +16,7 @@ public class Quaternion{
         this.z = z;
     }
 
+    // Empty constructor
     public Quaternion(){
         this.w = 1;
         this.x = 0;
@@ -20,6 +24,7 @@ public class Quaternion{
         this.z = 0;
     }
 
+    // Set all values of the quaternion
     public void set(float w, float x, float y, float z){
         this.w = w;
         this.x = x;
@@ -27,10 +32,12 @@ public class Quaternion{
         this.z = z;
     }
 
+    // Create a copy of this quaternion
     public Quaternion copy(){
         return new Quaternion(this.w, this.x, this.y, this.z);
     }
 
+    // Convert to EulerAngles
     public EulerAngles toEulerAngles() {
         // roll (x-axis rotation)
         float sinr_cosp = 2 * (w * x + y * z);
@@ -56,11 +63,12 @@ public class Quaternion{
         return angles;
     }
 
+    // Get the conjugate of this quaternion
     public Quaternion getConjugate() {
         return new Quaternion(w, -x, -y, -z);
     }
 
-    // We multiply this quaternion by q (this*q) with a Hamilton product
+    // We multiply this quaternion by q (return = this*q) with a Hamilton product
     public Quaternion multiply(final Quaternion q) {
         final float w = this.w * q.w - this.x * q.x - this.y * q.y - this.z * q.z;
         final float x = this.w * q.x + this.x * q.w + this.y * q.z - this.z * q.y;
@@ -75,6 +83,7 @@ public class Quaternion{
         return (this.multiply(refConjug));
     }
 
+    @NonNull
     public String toString(){
         return "W : "+w+" / X : "+x+" / Y : "+y+" / Z :"+z;
     }
